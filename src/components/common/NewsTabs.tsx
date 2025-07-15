@@ -19,6 +19,10 @@ interface NewsTabsProps {
 
 export function NewsTabs({ recentArticles, urgentArticles }: NewsTabsProps) {
   const [activeTab, setActiveTab] = useState<'recent' | 'urgent'>('recent');
+  
+  // If no urgent articles, force active tab to 'recent'
+  const hasUrgentArticles = urgentArticles.length > 0;
+  const currentTab = hasUrgentArticles ? activeTab : 'recent';
 
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm">
@@ -27,34 +31,36 @@ export function NewsTabs({ recentArticles, urgentArticles }: NewsTabsProps) {
           <button 
             onClick={() => setActiveTab('recent')}
             className={`relative flex-1 px-6 py-4 text-sm font-semibold transition-all duration-300 ease-out ${
-              activeTab === 'recent'
+              currentTab === 'recent'
                 ? 'text-oxford-blue bg-white shadow-sm transform scale-[1.02] z-10'
                 : 'text-gray-600 hover:text-oxford-blue hover:bg-white/50'
             }`}
           >
             <span className="relative z-10">Últimas</span>
-            {activeTab === 'recent' && (
+            {currentTab === 'recent' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-oxford-blue transform origin-left animate-pulse"></div>
             )}
           </button>
-          <button 
-            onClick={() => setActiveTab('urgent')}
-            className={`relative flex-1 px-6 py-4 text-sm font-semibold transition-all duration-300 ease-out ${
-              activeTab === 'urgent'
-                ? 'text-red-600 bg-white shadow-sm transform scale-[1.02] z-10'
-                : 'text-gray-600 hover:text-red-600 hover:bg-white/50'
-            }`}
-          >
-            <span className="relative z-10">Ui! Isso é vermelho</span>
-            {activeTab === 'urgent' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 transform origin-left animate-pulse"></div>
-            )}
-          </button>
+          {hasUrgentArticles && (
+            <button 
+              onClick={() => setActiveTab('urgent')}
+              className={`relative flex-1 px-6 py-4 text-sm font-semibold transition-all duration-300 ease-out ${
+                currentTab === 'urgent'
+                  ? 'text-red-600 bg-white shadow-sm transform scale-[1.02] z-10'
+                  : 'text-gray-600 hover:text-red-600 hover:bg-white/50'
+              }`}
+            >
+              <span className="relative z-10">Ui! Isso é vermelho</span>
+              {currentTab === 'urgent' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 transform origin-left animate-pulse"></div>
+              )}
+            </button>
+          )}
         </nav>
       </div>
       
       <div className="p-6 space-y-5">
-        {activeTab === 'recent' && (
+        {currentTab === 'recent' && (
           <>
             {recentArticles.length > 0 ? recentArticles.map((article) => (
               <Link key={article.id} href={`/article/${article.id}`}>
@@ -84,7 +90,7 @@ export function NewsTabs({ recentArticles, urgentArticles }: NewsTabsProps) {
           </>
         )}
         
-        {activeTab === 'urgent' && (
+        {currentTab === 'urgent' && (
           <>
             {urgentArticles.length > 0 ? urgentArticles.map((article) => (
               <Link key={article.id} href={`/article/${article.id}`}>

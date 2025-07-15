@@ -7,6 +7,47 @@ import { NewsTabs } from '@/components/common';
 import { DramaScore } from '@/components/articles';
 import ReactMarkdown from 'react-markdown';
 
+async function getDynamicCategories(): Promise<{id: string, name: string, active: boolean}[]> {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('processed_articles')
+    .select('category')
+    .eq('is_published', true)
+    .not('category', 'is', null)
+    .not('category', 'eq', '');
+
+  if (error) {
+    console.error('Error fetching categories:', error);
+    // Return default categories on error
+    return [
+      { id: 'all', name: 'Todas', active: false },
+      { id: 'futebol', name: 'Futebol', active: false },
+      { id: 'outros desportos', name: 'Outros Desportos', active: false },
+      { id: 'internacional', name: 'Internacional', active: false },
+    ];
+  }
+
+  // Get unique categories
+  const uniqueCategories = [...new Set(data?.map(item => item.category) || [])];
+  
+  // Create category objects
+  const categories = uniqueCategories
+    .filter(cat => cat && cat.trim() !== '')
+    .sort((a, b) => a.localeCompare(b, 'pt-PT'))
+    .map(category => ({
+      id: category.toLowerCase(),
+      name: category,
+      active: false
+    }));
+
+  // Always include 'all' as first option
+  return [
+    { id: 'all', name: 'Todas', active: false },
+    ...categories
+  ];
+}
+
 interface ArticlePageProps {
   params: {
     id: string;
@@ -178,6 +219,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const displayArticle = article || mockArticle;
 
+  // Get dynamic categories for navigation
+  const dynamicCategories = await getDynamicCategories();
+  const categories = dynamicCategories.map(cat => ({ ...cat, active: false }));
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header - Same as homepage */}
@@ -186,33 +231,34 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           
           {/* Main header */}
           <div className="flex items-center justify-between py-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
-                <span className="font-bold text-black">CV</span>
+            <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+              <div className="w-10 h-14 bg-red-600 rounded-lg shadow-xl transform rotate-12 hover:rotate-6 transition-transform duration-200">
               </div>
-              <span className="text-xl font-bold text-gray-900">Cartão Vermelho</span>
+              <div className="flex flex-col">
+                <span className="text-2xl font-black text-gray-900 tracking-tight bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+                  Cartão Vermelho
+                </span>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sports Drama
+                </span>
+              </div>
             </Link>
             
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-gray-900 font-medium hover:text-oxford-blue">Todas</Link>
-              <Link href="/?category=futebol" className="text-gray-600 hover:text-oxford-blue">Futebol</Link>
-              <Link href="/?category=outros%20desportos" className="text-gray-600 hover:text-oxford-blue">Outros Desportos</Link>
-              <Link href="/?category=internacional" className="text-gray-600 hover:text-oxford-blue">Internacional</Link>
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={category.id === 'all' ? '/' : `/?category=${category.id}`}
+                  className={`font-medium hover:text-oxford-blue transition-colors ${
+                    category.active ? 'text-oxford-blue' : 'text-gray-600'
+                  }`}
+                >
+                  {category.name}
+                </Link>
+              ))}
             </nav>
             
-            <div className="flex items-center gap-4">
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                </svg>
-              </button>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
       </header>
@@ -338,18 +384,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   </ReactMarkdown>
                 </div>
 
-                {/* Source Link */}
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <a
-                    href={displayArticle.original_articles.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-oxford-blue hover:text-penn-blue transition-colors"
-                  >
-                    <ExternalLink size={16} />
-                    Ver notícia original em {displayArticle.original_articles.source}
-                  </a>
-                </div>
               </div>
             </article>
 
@@ -394,28 +428,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               urgentArticles={tabsUrgentArticles}
             />
 
-            {/* Related Categories */}
-            <div className="bg-white rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-2 h-2 bg-oxford-blue rounded-full"></div>
-                <span className="text-sm font-medium text-gray-900">Navegar</span>
-              </div>
-              
-              <div className="space-y-2">
-                <Link href="/" className="block text-sm text-gray-600 hover:text-oxford-blue py-1">
-                  Todas as notícias
-                </Link>
-                <Link href="/?category=futebol" className="block text-sm text-gray-600 hover:text-oxford-blue py-1">
-                  Futebol
-                </Link>
-                <Link href="/?category=outros%20desportos" className="block text-sm text-gray-600 hover:text-oxford-blue py-1">
-                  Outros Desportos
-                </Link>
-                <Link href="/?category=internacional" className="block text-sm text-gray-600 hover:text-oxford-blue py-1">
-                  Internacional
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </main>

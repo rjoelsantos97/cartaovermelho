@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { DramaticCard } from '@/components/articles';
-import { BreakingNewsBanner, NewsTabs } from '@/components/common';
+import { BreakingNewsBanner, NewsTabs, InfinityScroll } from '@/components/common';
 import Link from 'next/link';
 
 interface ProcessedArticle {
@@ -45,7 +45,7 @@ async function getPublishedArticles(): Promise<ProcessedArticle[]> {
     `)
     .eq('is_published', true)
     .order('processed_at', { ascending: false })
-    .limit(20);
+    .limit(50); // Increased limit for initial load to catch more articles
 
   if (error) {
     console.error('Error fetching articles:', error);
@@ -53,6 +53,47 @@ async function getPublishedArticles(): Promise<ProcessedArticle[]> {
   }
 
   return data || [];
+}
+
+async function getDynamicCategories(): Promise<{id: string, name: string, active: boolean}[]> {
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('processed_articles')
+    .select('category')
+    .eq('is_published', true)
+    .not('category', 'is', null)
+    .not('category', 'eq', '');
+
+  if (error) {
+    console.error('Error fetching categories:', error);
+    // Return default categories on error
+    return [
+      { id: 'all', name: 'Todas', active: false },
+      { id: 'futebol', name: 'Futebol', active: false },
+      { id: 'outros desportos', name: 'Outros Desportos', active: false },
+      { id: 'internacional', name: 'Internacional', active: false },
+    ];
+  }
+
+  // Get unique categories
+  const uniqueCategories = [...new Set(data?.map(item => item.category) || [])];
+  
+  // Create category objects
+  const categories = uniqueCategories
+    .filter(cat => cat && cat.trim() !== '')
+    .sort((a, b) => a.localeCompare(b, 'pt-PT'))
+    .map(category => ({
+      id: category.toLowerCase(),
+      name: category,
+      active: false
+    }));
+
+  // Always include 'all' as first option
+  return [
+    { id: 'all', name: 'Todas', active: false },
+    ...categories
+  ];
 }
 
 
@@ -63,6 +104,7 @@ interface HomePageProps {
 export default async function PublicHome({ searchParams }: HomePageProps) {
   const selectedCategory = searchParams.category || 'all';
   const articles = await getPublishedArticles();
+  const dynamicCategories = await getDynamicCategories();
 
   // Mock data for development if no articles
   const mockArticles = articles.length === 0 ? [
@@ -70,7 +112,7 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
       id: '1',
       title: 'BOMBA TOTAL: Cristiano Ronaldo CHOCA o mundo do futebol!',
       excerpt: 'Decisão DRAMÁTICA abala os alicerces do desporto português. Ninguém esperava por isto!',
-      urgency: 'breaking' as const,
+      urgency: 'high' as const,
       category: 'Futebol',
       publishedAt: new Date().toISOString(),
       dramaScore: 10,
@@ -78,7 +120,7 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
     },
     {
       id: '2', 
-      title: 'URGENTE: Benfica em PÂNICO total após revelação BOMBÁSTICA',
+      title: 'ISTO É VERMELHO: Benfica em PÂNICO total após revelação BOMBÁSTICA',
       excerpt: 'Situação EXTREMA nas águias. Dirigentes em reunião de EMERGÊNCIA!',
       urgency: 'high' as const,
       category: 'Futebol',
@@ -95,43 +137,67 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
       publishedAt: new Date().toISOString(),
       dramaScore: 7,
       imageUrl: 'https://via.placeholder.com/400x300?text=EXCLUSIVO'
+    },
+    {
+      id: '4',
+      title: 'ISTO É VERMELHO: Porto em CAOS total após decisão EXPLOSIVA',
+      excerpt: 'Dragões em ESTADO DE CHOQUE. Situação CRÍTICA no clube!',
+      urgency: 'high' as const,
+      category: 'Futebol',
+      publishedAt: new Date().toISOString(),
+      dramaScore: 9,
+      imageUrl: 'https://via.placeholder.com/400x300?text=VERMELHO'
+    },
+    {
+      id: '5',
+      title: 'DRAMA EXTREMO: Sporting CP em REVOLUÇÃO interna TOTAL',
+      excerpt: 'Leões em GUERRA CIVIL. Decisões DRAMÁTICAS em curso!',
+      urgency: 'high' as const,
+      category: 'Futebol',
+      publishedAt: new Date().toISOString(),
+      dramaScore: 10,
+      imageUrl: 'https://via.placeholder.com/400x300?text=DRAMA+TOTAL'
     }
   ] : [];
 
   const allDisplayArticles = articles.length > 0 
-    ? articles.map(article => ({
-        id: article.id,
-        title: article.title,
-        excerpt: article.excerpt || article.content.substring(0, 400) + '...', // Use excerpt field if available
-        urgency: article.urgency_level,
-        category: article.category,
-        publishedAt: article.original_articles?.published_at || article.processed_at,
-        dramaScore: article.drama_score,
-        imageUrl: article.original_articles?.image_url
-      }))
+    ? articles.map((article, index) => {
+        const transformedArticle = {
+          id: article.id,
+          title: article.title,
+          excerpt: article.excerpt || article.content.substring(0, 400) + '...', // Use excerpt field if available
+          urgency: article.urgency_level, // Use original urgency level
+          category: article.category,
+          publishedAt: article.original_articles?.published_at || article.processed_at,
+          dramaScore: Number(article.drama_score),
+          imageUrl: article.original_articles?.image_url
+        };
+        
+        
+        return transformedArticle;
+      })
     : mockArticles;
 
   // Filter articles by category
   const displayArticles = selectedCategory === 'all' 
     ? allDisplayArticles 
-    : allDisplayArticles.filter(article => 
-        article.category.toLowerCase() === selectedCategory.toLowerCase()
-      );
+    : allDisplayArticles.filter(article => {
+        return article.category.toLowerCase() === selectedCategory.toLowerCase();
+      });
 
-  const categories = [
-    { id: 'all', name: 'Todas', active: selectedCategory === 'all' },
-    { id: 'futebol', name: 'Futebol', active: selectedCategory === 'futebol' },
-    { id: 'outros desportos', name: 'Outros Desportos', active: selectedCategory === 'outros desportos' },
-    { id: 'internacional', name: 'Internacional', active: selectedCategory === 'internacional' },
-  ];
+  // Set active category based on selected category
+  const categories = dynamicCategories.map(cat => ({
+    ...cat,
+    active: cat.id === selectedCategory
+  }));
 
 
   const featuredArticle = displayArticles[0];
-  const recentArticles = displayArticles.slice(1, 10); // Show up to 9 recent articles
-  const trendyArticles = displayArticles.slice(10); // Show remaining articles
+  const recentArticles = displayArticles.slice(1, 5); // Show only 4 recent articles
+  const remainingArticles = displayArticles.slice(5); // All remaining articles for infinity scroll
   const urgentArticles = displayArticles.filter(article => 
     article.urgency === 'breaking' || article.urgency === 'high'
-  ).slice(0, 8); // Show up to 8 urgent articles
+  ).slice(0, 8);
 
   // Prepare data for NewsTabs component - limit to 5 articles each
   const tabsRecentArticles = recentArticles.slice(0, 5).map(article => ({
@@ -152,6 +218,10 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
     publishedAt: article.publishedAt
   }));
 
+
+  // Always show sidebar (has recent articles and potentially urgent articles)
+  const showSidebar = tabsRecentArticles.length > 0 || tabsUrgentArticles.length > 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -160,11 +230,17 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
           
           {/* Main header */}
           <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
-                <span className="font-bold text-black">CV</span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-14 bg-red-600 rounded-lg shadow-xl transform rotate-12 hover:rotate-6 transition-transform duration-200">
               </div>
-              <span className="text-xl font-bold text-gray-900">Cartão Vermelho</span>
+              <div className="flex flex-col">
+                <span className="text-2xl font-black text-gray-900 tracking-tight bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+                  Cartão Vermelho
+                </span>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sports Drama
+                </span>
+              </div>
             </div>
             
             {/* Navigation */}
@@ -188,9 +264,19 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Content - Hero + Trendy News */}
-          <div className="lg:col-span-3 space-y-8">
+        <div className="relative">
+          {/* Sidebar - Fixed position */}
+          <div className="hidden lg:block absolute top-0 right-0 w-80 z-10">
+            <div className="sticky top-0">
+              <NewsTabs 
+                recentArticles={tabsRecentArticles}
+                urgentArticles={tabsUrgentArticles}
+              />
+            </div>
+          </div>
+          
+          {/* Main Content - with dynamic right margin */}
+          <div className="lg:mr-84 space-y-8" id="main-content">
             {displayArticles.length > 0 ? (
               <>
                 {/* Hero Article */}
@@ -229,7 +315,7 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
                     <h2 className="text-2xl font-bold text-gray-900">Notícias em Destaque</h2>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {recentArticles.map((article) => (
                       <Link key={article.id} href={`/article/${article.id}`}>
                         <div className="group cursor-pointer">
@@ -258,42 +344,17 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
                   </div>
                 </section>
 
-                {/* Additional Articles Section */}
-                {trendyArticles.length > 0 && (
-                  <section>
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold text-gray-900">Mais Notícias</h2>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {trendyArticles.map((article) => (
-                        <Link key={article.id} href={`/article/${article.id}`}>
-                          <div className="group cursor-pointer">
-                            <div className="relative rounded-lg overflow-hidden mb-4 h-48">
-                              {article.imageUrl ? (
-                                <img
-                                  src={article.imageUrl}
-                                  alt={article.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300"></div>
-                              )}
-                            </div>
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <span className="text-oxford-blue font-medium">{article.category}</span>
-                              </div>
-                              <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-oxford-blue transition-colors">
-                                {article.title}
-                              </h3>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                {/* Infinity Scroll Articles Section - This section will expand to full width */}
+                <section className="lg:mr-[-336px]" id="infinity-scroll-section">
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Todas as Notícias</h2>
+                  </div>
+                  
+                  <InfinityScroll 
+                    initialArticles={remainingArticles}
+                    category={selectedCategory}
+                  />
+                </section>
               </>
             ) : (
               <div className="bg-white rounded-xl p-12 text-center">
@@ -307,14 +368,12 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
             )}
           </div>
 
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* News Tabs Component */}
+          {/* Mobile Sidebar - Show below main content on mobile */}
+          <div className="lg:hidden mt-8">
             <NewsTabs 
               recentArticles={tabsRecentArticles}
               urgentArticles={tabsUrgentArticles}
             />
-
           </div>
         </div>
       </main>
