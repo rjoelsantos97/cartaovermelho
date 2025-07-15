@@ -45,13 +45,27 @@ export default function AdminDashboard() {
       setLoading(true);
       
       // Fetch scheduler status
-      const schedulerResponse = await fetch('/api/scheduler');
+      const schedulerResponse = await fetch('/api/scheduler', {
+        credentials: 'include'
+      });
+      
+      if (!schedulerResponse.ok) {
+        console.error('❌ Erro ao buscar scheduler status:', schedulerResponse.status, schedulerResponse.statusText);
+        const errorData = await schedulerResponse.json();
+        console.error('❌ Erro detalhado:', errorData);
+        return;
+      }
+      
       const schedulerData = await schedulerResponse.json();
+      console.log('📊 Scheduler data received:', schedulerData);
       
       // Fetch pipeline status
-      const pipelineResponse = await fetch('/api/run-pipeline');
+      const pipelineResponse = await fetch('/api/run-pipeline', {
+        credentials: 'include'
+      });
       const pipelineData = await pipelineResponse.json();
       
+
       setDashboardData({
         schedulers: schedulerData.schedulers || [],
         originalArticles: pipelineData.status?.originalArticles || 0,
@@ -84,6 +98,7 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ action })
       });
       
@@ -131,21 +146,37 @@ export default function AdminDashboard() {
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Status dos Schedulers</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {dashboardData?.schedulers.map((scheduler) => (
-            <div key={scheduler.jobName} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div>
-                <h3 className="font-medium">
-                  {scheduler.jobName === 'pipeline' ? 'Pipeline Completo' : 'Scraping Apenas'}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {scheduler.jobName === 'pipeline' ? 'A cada 2 horas' : 'A cada hora'}
-                </p>
+          {dashboardData?.schedulers && dashboardData.schedulers.length > 0 ? (
+            dashboardData.schedulers.map((scheduler) => (
+              <div key={scheduler.jobName} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div>
+                  <h3 className="font-medium">
+                    {scheduler.jobName === 'pipeline' ? 'Pipeline Completo (Scraping + LLM)' : 'Scraping Apenas'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {scheduler.jobName === 'pipeline' ? 'A cada hora às xx:20' : 'A cada hora às xx:20'}
+                  </p>
+                  {scheduler.nextRun && (
+                    <p className="text-xs text-muted-foreground">
+                      Próxima: {new Date(scheduler.nextRun).toLocaleString('pt-PT', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        day: '2-digit',
+                        month: '2-digit'
+                      })}
+                    </p>
+                  )}
+                </div>
+                <Badge variant={scheduler.running ? 'default' : 'secondary'}>
+                  {scheduler.running ? 'Ativo' : 'Inativo'}
+                </Badge>
               </div>
-              <Badge variant={scheduler.running ? 'default' : 'secondary'}>
-                {scheduler.running ? 'Ativo' : 'Inativo'}
-              </Badge>
+            ))
+          ) : (
+            <div className="col-span-2 text-center py-8">
+              <p className="text-muted-foreground">Nenhum scheduler ativo. Clique "Iniciar Pipeline" para começar.</p>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Scheduler Controls */}
@@ -155,7 +186,7 @@ export default function AdminDashboard() {
             disabled={actionLoading === 'start-both'}
             className="bg-green-600 hover:bg-green-700"
           >
-            {actionLoading === 'start-both' ? '⏳' : '🚀'} Iniciar Ambos
+            {actionLoading === 'start-both' ? '⏳' : '🚀'} Iniciar Pipeline
           </Button>
           <Button
             onClick={() => handleSchedulerAction('stop-all')}

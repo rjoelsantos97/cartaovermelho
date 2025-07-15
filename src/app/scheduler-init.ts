@@ -4,18 +4,19 @@ import { getCronService } from '@/lib/scheduler/cron-service';
 if (typeof window === 'undefined') { // Server-side only
   console.log('🚀 Inicializando schedulers automáticos...');
   
-  // Start schedulers after a short delay to ensure app is ready
-  setTimeout(() => {
+  // Use setImmediate to ensure it runs after the current event loop
+  setImmediate(() => {
     try {
       const cronService = getCronService();
       
-      // Start both schedulers by default
-      cronService.startPipelineScheduler(); // Every 2 hours
-      cronService.startScrapingOnlyScheduler(); // Every hour
+      // Start only pipeline scheduler (includes scraping + LLM)
+      cronService.startPipelineScheduler(); // Every hour at xx:20
       
-      console.log('✅ Schedulers automáticos iniciados com sucesso');
+      // Log current status
+      const status = cronService.getJobStatus();
+      console.log('✅ Schedulers automáticos iniciados:', status);
     } catch (error) {
       console.error('❌ Erro ao iniciar schedulers automáticos:', error);
     }
-  }, 5000); // 5 second delay
+  });
 }

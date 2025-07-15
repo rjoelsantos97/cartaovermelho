@@ -19,7 +19,7 @@ This is **Cartão Vermelho News** - a Portuguese sports news webapp that transfo
 
 ## Current Project Status
 
-**Active Development Phase** - Currently implementing Phase 1 as outlined in `plano_fase_1.md`. Check that file for current progress and task status.
+**PROJETO CONCLUÍDO E OPERACIONAL** - Fase 1 completamente implementada com sistema automático funcionando. Ver `plano_fase_1.md` para detalhes completos do progresso.
 
 ## Important Files to Track
 
@@ -30,10 +30,10 @@ This is **Cartão Vermelho News** - a Portuguese sports news webapp that transfo
 ## Key Architecture Components
 
 ### Core Systems
-1. **Scraping System**: Automated scraping from abola.pt with configurable intervals
-2. **LLM Processing**: Transform articles using OpenRouter API with custom "Cartão Vermelho" prompts
-3. **Admin Dashboard**: Full control panel for managing content and jobs
-4. **Public Interface**: Dramatic sports news feed with categories and search
+1. **Scraping System**: Automated scraping from abola.pt with schedulers (every hour) ✅
+2. **LLM Processing**: Transform articles using OpenRouter API with custom "Cartão Vermelho" prompts ✅
+3. **Admin Dashboard**: Full control panel for managing content and jobs with real-time monitoring ✅
+4. **Public Interface**: Dramatic sports news feed with categories and search ✅
 
 ### Database Structure
 - `original_articles`: Scraped content storage
@@ -84,6 +84,7 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_KEY=your_service_key
 OPENROUTER_API_KEY=your_openrouter_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000  # For automatic scheduler
 ```
 
 ### Docker Deployment
@@ -122,14 +123,19 @@ docker-compose ps
 - **Urgency Levels**: Low, Medium, High, Breaking
 
 ### Admin Features
-- Real-time job monitoring
-- Scraping configuration
-- Content moderation
-- Performance analytics
+- Real-time job monitoring with scheduler controls ✅
+- Scraping configuration and manual triggers ✅
+- Content moderation and publishing controls ✅
+- Performance analytics with accurate counters ✅
+- Automatic scheduler management (start/stop/status) ✅
 
 ## Security Considerations
 
-- Supabase Auth for admin access
+- **Supabase Auth for admin access** ✅ **IMPLEMENTADO**
+- **Middleware authentication** ✅ **IMPLEMENTADO**
+- **Protected admin routes** ✅ **IMPLEMENTADO**
+- **API endpoint protection** ✅ **IMPLEMENTADO**
+- **Session management** ✅ **IMPLEMENTADO**
 - Rate limiting for scraping
 - Input validation and sanitization
 - Secure API key management
@@ -144,21 +150,51 @@ docker-compose ps
 - **ALWAYS UPDATE plano_fase_1.md when completing tasks**
 - Admin dashboard uses total article counts from database (not limited queries)
 - Homepage displays all published articles across multiple sections
+- **Automatic schedulers**: Scraping (1h) + Full pipeline (2h) run automatically on app start
+- **Scheduler controls**: Full start/stop/status management via admin dashboard
+- **Security structure**: Login page unprotected, dashboard protected by AuthGuard
+- **No pre-filled credentials**: Login fields empty for security best practices
 
 ## Implementation Phases
 
-1. **Phase 1**: Basic scraping, LLM integration, simple interface
-2. **Phase 2**: Admin dashboard, async job system, UI improvements
-3. **Phase 3**: Optimization, testing, deployment
+1. **Phase 1**: Basic scraping, LLM integration, simple interface ✅ **CONCLUÍDO**
+2. **Phase 2**: Admin dashboard, async job system, UI improvements ✅ **CONCLUÍDO**
+3. **Phase 3**: Optimization, testing, deployment ⏳ **Opcional**
 
-## Common Tasks (When Implemented)
+## Common Tasks (Sistema Implementado)
 
-Since this is a planning phase, standard development commands would be:
-- `npm run dev` - Start development server
+Comandos de desenvolvimento disponíveis:
+- `npm run dev` - Start development server (schedulers auto-start)
 - `npm run build` - Build for production
 - `npm run lint` - Code linting
 - `npm test` - Run tests
 - `docker-compose up` - Start full stack
+
+### URLs Importantes
+- **Homepage**: `http://localhost:3000` - Interface pública
+- **Admin Login**: `http://localhost:3000/admin/login` - Login de administrador
+- **Admin Dashboard**: `http://localhost:3000/admin/dashboard` - Controlo do sistema (protegido)
+- **Supabase Studio**: `http://127.0.0.1:54323` - Gestão da BD
+
+### Criação de Utilizador Admin
+Para criar o utilizador admin inicial:
+```bash
+node scripts/diagnose-auth.js
+```
+**Credenciais padrão:**
+- Email: `admin@cartaovermelho.pt`
+- Password: `admin123`
+
+**Nota:** Campos de login não vêm pré-preenchidos por razões de segurança.
+
+### Segurança Implementada
+- **Middleware de autenticação** protege todas as rotas `/admin/*` e APIs críticas
+- **Login obrigatório** para aceder ao dashboard admin
+- **Validação de tokens** em todos os endpoints API protegidos
+- **Logout funcional** com limpeza de sessão
+- **Redirecionamento automático** para login quando não autenticado
+- **Estrutura de layouts segura** - Login sem AuthGuard, Dashboard com AuthGuard
+- **Campos de login vazios** - Sem credenciais pré-preenchidas por segurança
 
 ## Content Guidelines
 

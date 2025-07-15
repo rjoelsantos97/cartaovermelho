@@ -1,7 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ScrapingService } from '@/lib/scraping/scraping-service';
+import { validateApiAuth, createUnauthorizedResponse } from '@/lib/auth/api-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Validate authentication
+  const authResult = await validateApiAuth(request);
+  
+  if (!authResult.success) {
+    return createUnauthorizedResponse(authResult.error);
+  }
+
+  console.log(`✅ Test scraping initiated by admin: ${authResult.user?.email}`);
+  
   try {
     console.log('🚀 Iniciando teste de scraping via API...');
     

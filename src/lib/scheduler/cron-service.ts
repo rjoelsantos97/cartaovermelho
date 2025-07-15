@@ -2,20 +2,28 @@ import * as cron from 'node-cron';
 
 export class CronService {
   private jobs: Map<string, cron.ScheduledTask> = new Map();
+  private jobSchedules: Map<string, string> = new Map();
+  private instanceId: string = Math.random().toString(36).substr(2, 9);
+
+  constructor() {
+    // CronService instance created
+  }
 
   startPipelineScheduler(): void {
     // Stop existing job if running
     this.stopJob('pipeline');
 
-    // Schedule pipeline to run every 2 hours
-    const task = cron.schedule('0 */2 * * *', async () => {
+    // Schedule pipeline to run every hour at 20 minutes past the hour
+    const cronExpression = '20 * * * *';
+    const task = cron.schedule(cronExpression, async () => {
       console.log('🕐 Iniciando pipeline automática...');
       
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/run-pipeline`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
           }
         });
 
@@ -29,29 +37,31 @@ export class CronService {
         console.error('❌ Erro ao executar pipeline automática:', error);
       }
     }, {
-      scheduled: false, // Don't start immediately
+      scheduled: true, // Start immediately
       timezone: 'Europe/Lisbon'
     });
 
     this.jobs.set('pipeline', task);
-    task.start();
+    this.jobSchedules.set('pipeline', cronExpression);
     
-    console.log('🚀 Scheduler da pipeline ativado - execução a cada 2 horas');
+    console.log('🚀 Scheduler da pipeline ativado - execução a cada hora às xx:20');
   }
 
   startScrapingOnlyScheduler(): void {
     // Stop existing job if running
     this.stopJob('scraping');
 
-    // Schedule scraping only to run every hour
-    const task = cron.schedule('0 * * * *', async () => {
+    // Schedule scraping only to run every hour at 13 minutes past the hour
+    const cronExpression = '13 * * * *';
+    const task = cron.schedule(cronExpression, async () => {
       console.log('🕐 Iniciando scraping automático...');
       
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/test-scraping-only`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
           }
         });
 
@@ -65,14 +75,14 @@ export class CronService {
         console.error('❌ Erro ao executar scraping automático:', error);
       }
     }, {
-      scheduled: false,
+      scheduled: true,
       timezone: 'Europe/Lisbon'
     });
 
     this.jobs.set('scraping', task);
-    task.start();
+    this.jobSchedules.set('scraping', cronExpression);
     
-    console.log('🚀 Scheduler do scraping ativado - execução a cada hora');
+    console.log('🚀 Scheduler do scraping ativado - execução a cada hora às xx:13');
   }
 
   stopJob(jobName: string): void {
@@ -81,6 +91,7 @@ export class CronService {
       job.stop();
       job.destroy();
       this.jobs.delete(jobName);
+      this.jobSchedules.delete(jobName);
       console.log(`⏹️ Job ${jobName} parado`);
     }
   }
@@ -92,17 +103,57 @@ export class CronService {
       console.log(`⏹️ Job ${name} parado`);
     });
     this.jobs.clear();
+    this.jobSchedules.clear();
+  }
+
+  private getNextRunTime(cronExpression: string): Date {
+    const now = new Date();
+    
+    if (cronExpression === '20 * * * *') {
+      // Cron executa a cada hora aos 20 minutos
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const date = now.getDate();
+      const hour = now.getHours();
+      const minute = now.getMinutes();
+      
+      // Se ainda não passou dos 20 minutos desta hora
+      if (minute < 20) {
+        // Próxima execução é hoje, esta hora, aos 20 minutos
+        return new Date(year, month, date, hour, 20, 0, 0);
+      } else {
+        // Já passou dos 20 minutos, próxima execução é na próxima hora
+        // Se for 23h, volta para 0h do dia seguinte
+        if (hour === 23) {
+          return new Date(year, month, date + 1, 0, 20, 0, 0);
+        } else {
+          return new Date(year, month, date, hour + 1, 20, 0, 0);
+        }
+      }
+    }
+    
+    return new Date(now.getTime() + 60000); // Default: 1 minute
   }
 
   getJobStatus(): { jobName: string; running: boolean; nextRun?: Date }[] {
     const status: { jobName: string; running: boolean; nextRun?: Date }[] = [];
     
+    // Get job status
+    
     this.jobs.forEach((job, name) => {
       try {
+        const cronExpression = this.jobSchedules.get(name);
+        const jobStatus = job.getStatus();
+        // In node-cron, when scheduled:true, job is active
+        const running = this.jobs.has(name) && jobStatus !== 'destroyed';
+        
+        // Calculate next run time manually
+        const nextRun = cronExpression ? this.getNextRunTime(cronExpression) : undefined;
+        
         status.push({
           jobName: name,
-          running: job.getStatus() === 'scheduled',
-          nextRun: undefined // Simplified for now
+          running: running,
+          nextRun: nextRun
         });
       } catch (error) {
         console.error(`Error getting status for job ${name}:`, error);
@@ -113,7 +164,6 @@ export class CronService {
         });
       }
     });
-
     return status;
   }
 
@@ -125,7 +175,8 @@ export class CronService {
       const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/run-pipeline`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
         }
       });
 
@@ -148,7 +199,8 @@ export class CronService {
       const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/test-scraping-only`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
         }
       });
 
@@ -165,12 +217,14 @@ export class CronService {
   }
 }
 
-// Global singleton instance
-let cronService: CronService | null = null;
+// Global singleton instance using globalThis for Next.js
+declare global {
+  var __cronService: CronService | undefined;
+}
 
 export function getCronService(): CronService {
-  if (!cronService) {
-    cronService = new CronService();
+  if (!globalThis.__cronService) {
+    globalThis.__cronService = new CronService();
   }
-  return cronService;
+  return globalThis.__cronService;
 }

@@ -1,7 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getCronService } from '@/lib/scheduler/cron-service';
+import { validateApiAuth, createUnauthorizedResponse } from '@/lib/auth/api-auth';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Validate authentication
+  const authResult = await validateApiAuth(request);
+  
+  if (!authResult.success) {
+    return createUnauthorizedResponse(authResult.error);
+  }
+
+  console.log(`✅ Scheduler action initiated by admin: ${authResult.user?.email}`);
+  
   try {
     const { action } = await request.json();
     const cronService = getCronService();
@@ -11,7 +21,7 @@ export async function POST(request: Request) {
         cronService.startPipelineScheduler();
         return NextResponse.json({
           success: true,
-          message: 'Pipeline scheduler ativado - execução a cada 2 horas'
+          message: 'Pipeline scheduler ativado - execução a cada hora'
         });
 
       case 'start-scraping':
@@ -23,10 +33,9 @@ export async function POST(request: Request) {
 
       case 'start-both':
         cronService.startPipelineScheduler();
-        cronService.startScrapingOnlyScheduler();
         return NextResponse.json({
           success: true,
-          message: 'Ambos schedulers ativados - Pipeline a cada 2h, Scraping a cada 1h'
+          message: 'Pipeline scheduler ativado - Scraping + LLM a cada hora'
         });
 
       case 'stop-pipeline':
@@ -80,10 +89,18 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Validate authentication
+  const authResult = await validateApiAuth(request);
+  
+  if (!authResult.success) {
+    return createUnauthorizedResponse(authResult.error);
+  }
+
   try {
     const cronService = getCronService();
     const status = cronService.getJobStatus();
+    
     
     return NextResponse.json({
       success: true,

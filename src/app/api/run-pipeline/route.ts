@@ -1,8 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ScrapingService } from '@/lib/scraping/scraping-service';
 import { ProcessingService } from '@/lib/llm/processing-service';
+import { validateApiAuth, createUnauthorizedResponse } from '@/lib/auth/api-auth';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // Validate authentication
+  const authResult = await validateApiAuth(request);
+  
+  if (!authResult.success) {
+    return createUnauthorizedResponse(authResult.error);
+  }
+
+  console.log(`✅ Pipeline initiated by admin: ${authResult.user?.email}`);
+  
   try {
     console.log('🚀 Iniciando pipeline completo: Scraping + LLM...');
     
