@@ -94,6 +94,7 @@ src/
 - [x] Rate limiting e retry logic para APIs
 - [x] Logs detalhados de erro e sucesso
 - [x] Interface para executar e monitorar jobs
+- [x] Scheduler automático ativado (scraping cada hora, pipeline cada 2h)
 
 ### 10. Integração LLM Funcional
 - [x] Cliente OpenRouter com DeepSeek Chat
@@ -156,6 +157,21 @@ src/
   ✅ Base de dados Supabase com todas as tabelas e relações
   ✅ Rate limiting, retry logic e error handling robusto
   ✅ Design system "Cartão Vermelho" completo
+
+### Data: 2024-07-15
+- Tarefa realizada:
+  ✅ **SCHEDULER AUTOMÁTICO IMPLEMENTADO E ATIVO**
+  ✅ Scheduler de scraping automático (executa a cada hora)
+  ✅ Scheduler de pipeline completo (executa a cada 2 horas)
+  ✅ Inicialização automática dos schedulers na app
+  ✅ Admin dashboard com controlo total dos schedulers
+  ✅ Monitorização em tempo real do status dos jobs
+  ✅ Controles manuais para iniciar/parar schedulers
+  ✅ Estatísticas detalhadas e jobs history no dashboard
+  ✅ **CORREÇÃO DOS CONTADORES DO DASHBOARD**
+  ✅ Adicionados métodos para contagem total de artigos na BD
+  ✅ Dashboard agora mostra contadores corretos (total vs limitados)
+  ✅ Homepage atualizada para mostrar todos os artigos publicados
   
 - Sistema Testado e Validado: 
   🎯 ✅ Scraping de notícias reais do abola.pt via RSS

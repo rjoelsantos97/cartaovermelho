@@ -127,14 +127,14 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
 
 
   const featuredArticle = displayArticles[0];
-  const recentArticles = displayArticles.slice(1, 4);
-  const trendyArticles = displayArticles.slice(4, 7);
+  const recentArticles = displayArticles.slice(1, 10); // Show up to 9 recent articles
+  const trendyArticles = displayArticles.slice(10); // Show remaining articles
   const urgentArticles = displayArticles.filter(article => 
     article.urgency === 'breaking' || article.urgency === 'high'
-  ).slice(0, 3);
+  ).slice(0, 8); // Show up to 8 urgent articles
 
-  // Prepare data for NewsTabs component
-  const tabsRecentArticles = recentArticles.map(article => ({
+  // Prepare data for NewsTabs component - limit to 5 articles each
+  const tabsRecentArticles = recentArticles.slice(0, 5).map(article => ({
     id: article.id,
     title: article.title,
     category: article.category,
@@ -143,7 +143,7 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
     publishedAt: article.publishedAt
   }));
 
-  const tabsUrgentArticles = urgentArticles.map(article => ({
+  const tabsUrgentArticles = urgentArticles.slice(0, 5).map(article => ({
     id: article.id,
     title: article.title,
     category: article.category,
@@ -229,8 +229,8 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
                     <h2 className="text-2xl font-bold text-gray-900">Notícias em Destaque</h2>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {trendyArticles.map((article) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {recentArticles.map((article) => (
                       <Link key={article.id} href={`/article/${article.id}`}>
                         <div className="group cursor-pointer">
                           <div className="relative rounded-lg overflow-hidden mb-4 h-48">
@@ -257,6 +257,43 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
                     ))}
                   </div>
                 </section>
+
+                {/* Additional Articles Section */}
+                {trendyArticles.length > 0 && (
+                  <section>
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-bold text-gray-900">Mais Notícias</h2>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {trendyArticles.map((article) => (
+                        <Link key={article.id} href={`/article/${article.id}`}>
+                          <div className="group cursor-pointer">
+                            <div className="relative rounded-lg overflow-hidden mb-4 h-48">
+                              {article.imageUrl ? (
+                                <img
+                                  src={article.imageUrl}
+                                  alt={article.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300"></div>
+                              )}
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <span className="text-oxford-blue font-medium">{article.category}</span>
+                              </div>
+                              <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-oxford-blue transition-colors">
+                                {article.title}
+                              </h3>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
               </>
             ) : (
               <div className="bg-white rounded-xl p-12 text-center">

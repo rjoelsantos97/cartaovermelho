@@ -218,6 +218,19 @@ export class ScrapingService {
     return data || [];
   }
 
+  async getTotalArticlesCount(): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('original_articles')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      console.error('Error counting articles:', error);
+      return 0;
+    }
+
+    return count || 0;
+  }
+
   async getScrapingJobs(limit: number = 10): Promise<ScrapingJob[]> {
     const { data, error } = await this.supabase
       .from('async_jobs')

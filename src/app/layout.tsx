@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
+import "./scheduler-init";
 
 const inter = Inter({
   variable: "--font-inter",

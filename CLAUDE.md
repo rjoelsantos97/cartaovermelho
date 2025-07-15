@@ -142,6 +142,8 @@ docker-compose ps
 - LLM processing includes fallback and retry logic
 - Mobile-first responsive design approach
 - **ALWAYS UPDATE plano_fase_1.md when completing tasks**
+- Admin dashboard uses total article counts from database (not limited queries)
+- Homepage displays all published articles across multiple sections
 
 ## Implementation Phases
 

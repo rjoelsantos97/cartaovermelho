@@ -98,15 +98,19 @@ export async function GET() {
     // Get status info
     const recentScrapingJobs = await scrapingService.getScrapingJobs(3);
     const recentProcessingJobs = await processingService.getProcessingJobs(3);
-    const recentArticles = await scrapingService.getRecentArticles(5);
     const processedArticles = await processingService.getProcessedArticles(5);
+    
+    // Get total counts
+    const totalOriginalArticles = await scrapingService.getTotalArticlesCount();
+    const totalProcessedArticles = await processingService.getTotalProcessedArticlesCount();
+    const totalPublishedArticles = await processingService.getTotalPublishedArticlesCount();
     
     return NextResponse.json({
       success: true,
       status: {
-        originalArticles: recentArticles.length,
-        processedArticles: processedArticles.length,
-        publishedArticles: processedArticles.filter(a => a.is_published).length,
+        originalArticles: totalOriginalArticles,
+        processedArticles: totalProcessedArticles,
+        publishedArticles: totalPublishedArticles,
         recentScrapingJobs: recentScrapingJobs.map(job => ({
           id: job.id.substring(0, 8) + '...',
           status: job.status,

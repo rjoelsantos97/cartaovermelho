@@ -257,6 +257,33 @@ export class ProcessingService {
     return data || [];
   }
 
+  async getTotalProcessedArticlesCount(): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('processed_articles')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      console.error('Error counting processed articles:', error);
+      return 0;
+    }
+
+    return count || 0;
+  }
+
+  async getTotalPublishedArticlesCount(): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('processed_articles')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_published', true);
+
+    if (error) {
+      console.error('Error counting published articles:', error);
+      return 0;
+    }
+
+    return count || 0;
+  }
+
   async getProcessingJobs(limit: number = 10): Promise<ProcessingJob[]> {
     const { data, error } = await this.supabase
       .from('async_jobs')
