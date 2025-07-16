@@ -14,6 +14,8 @@ services:
           origins:
             - "http://localhost:3000"
             - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
           methods:
             - GET
             - POST
@@ -29,8 +31,20 @@ services:
             - Authorization
             - Origin
             - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
           credentials: true
           max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
 
   - name: auth-v1-open-callback
     url: http://auth:9999/callback
@@ -45,6 +59,8 @@ services:
           origins:
             - "http://localhost:3000"
             - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
           methods:
             - GET
             - POST
@@ -60,8 +76,20 @@ services:
             - Authorization
             - Origin
             - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
           credentials: true
           max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
 
   - name: auth-v1-open-authorize
     url: http://auth:9999/authorize
@@ -76,6 +104,8 @@ services:
           origins:
             - "http://localhost:3000"
             - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
           methods:
             - GET
             - POST
@@ -91,8 +121,66 @@ services:
             - Authorization
             - Origin
             - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
           credentials: true
           max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
+
+  - name: auth-v1-token
+    _comment: "GoTrue Token: /auth/v1/token -> http://auth:9999/token"
+    url: http://auth:9999/token
+    routes:
+      - name: auth-v1-token
+        strip_path: true
+        paths:
+          - /auth/v1/token
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "http://localhost:3000"
+            - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Language
+            - Content-Language
+            - Content-Type
+            - Authorization
+            - Origin
+            - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
+          credentials: true
+          max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
 
   - name: auth-v1
     _comment: "GoTrue: /auth/v1/* -> http://auth:9999/*"
@@ -101,13 +189,15 @@ services:
       - name: auth-v1-all
         strip_path: true
         paths:
-          - /auth/v1/
+          - /auth/v1
     plugins:
       - name: cors
         config:
           origins:
             - "http://localhost:3000"
             - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
           methods:
             - GET
             - POST
@@ -123,8 +213,20 @@ services:
             - Authorization
             - Origin
             - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
           credentials: true
           max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
 
   - name: rest-v1
     _comment: "PostgREST: /rest/v1/* -> http://rest:3000/*"
@@ -140,6 +242,8 @@ services:
           origins:
             - "http://localhost:3000"
             - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
           methods:
             - GET
             - POST
@@ -155,12 +259,24 @@ services:
             - Authorization
             - Origin
             - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
             - Content-Profile
             - Prefer
             - Range
             - X-Client-Info
           credentials: true
           max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
 
   - name: realtime-v1
     _comment: "Realtime: /realtime/v1/* -> ws://realtime:4000/socket/*"
@@ -176,6 +292,8 @@ services:
           origins:
             - "http://localhost:3000"
             - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
           methods:
             - GET
             - POST
@@ -191,5 +309,63 @@ services:
             - Authorization
             - Origin
             - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
           credentials: true
           max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
+
+  - name: pg-meta
+    _comment: "pg-meta: /pg-meta/* -> http://meta:8080/*"
+    url: http://meta:8080/
+    routes:
+      - name: pg-meta-all
+        strip_path: true
+        paths:
+          - /pg-meta/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "http://localhost:3000"
+            - "http://localhost:54323"
+            - "http://127.0.0.1:3000"
+            - "http://127.0.0.1:54323"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Language
+            - Content-Language
+            - Content-Type
+            - Authorization
+            - Origin
+            - X-Requested-With
+            - X-Client-Info
+            - apikey
+            - x-request-id
+            - x-client-info
+            - x-supabase-api-version
+          credentials: true
+          max_age: 3600
+          preflight_continue: false
+          exposed_headers:
+            - X-Total-Count
+            - Link
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Reset
