@@ -115,7 +115,7 @@ services:
       KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
       KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
     ports:
-      - "8000:8000"
+      - "8001:8000"
       - "8443:8443"
     volumes:
       - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
