@@ -2,7 +2,7 @@ _format_version: "1.1"
 
 services:
   - name: auth-v1-open
-    url: http://157.230.113.38:9999/verify
+    url: http://auth:9999/verify
     routes:
       - name: auth-v1-open
         strip_path: true
@@ -49,7 +49,7 @@ services:
             - X-RateLimit-Reset
 
   - name: auth-v1-open-callback
-    url: http://157.230.113.38:9999/callback
+    url: http://auth:9999/callback
     routes:
       - name: auth-v1-open-callback
         strip_path: true
@@ -96,7 +96,7 @@ services:
             - X-RateLimit-Reset
 
   - name: auth-v1-open-authorize
-    url: http://157.230.113.38:9999/authorize
+    url: http://auth:9999/authorize
     routes:
       - name: auth-v1-open-authorize
         strip_path: true
@@ -143,8 +143,8 @@ services:
             - X-RateLimit-Reset
 
   - name: auth-v1-token
-    _comment: "GoTrue Token: /auth/v1/token -> http://157.230.113.38:9999/token"
-    url: http://157.230.113.38:9999/token
+    _comment: "GoTrue Token: /auth/v1/token -> http://auth:9999/token"
+    url: http://auth:9999/token
     routes:
       - name: auth-v1-token
         strip_path: true
@@ -191,8 +191,8 @@ services:
             - X-RateLimit-Reset
 
   - name: auth-v1
-    _comment: "GoTrue: /auth/v1/* -> http://157.230.113.38:9999/*"
-    url: http://157.230.113.38:9999/
+    _comment: "GoTrue: /auth/v1/* -> http://auth:9999/*"
+    url: http://auth:9999/
     routes:
       - name: auth-v1-all
         strip_path: true
@@ -239,8 +239,8 @@ services:
             - X-RateLimit-Reset
 
   - name: rest-v1
-    _comment: "PostgREST: /rest/v1/* -> http://157.230.113.38:3001/*"
-    url: http://157.230.113.38:3001/
+    _comment: "PostgREST: /rest/v1/* -> http://rest:3000/*"
+    url: http://rest:3000/
     routes:
       - name: rest-v1-all
         strip_path: true
@@ -292,7 +292,7 @@ services:
 
   - name: realtime-v1
     _comment: "Realtime: /realtime/v1/* -> ws://realtime:4000/socket/*"
-    url: http://157.230.113.38:4000/socket
+    url: http://realtime:4000/socket
     routes:
       - name: realtime-v1-all
         strip_path: true
@@ -339,8 +339,8 @@ services:
             - X-RateLimit-Reset
 
   - name: pg-meta
-    _comment: "pg-meta: /pg-meta/* -> http://157.230.113.38:8081/*"
-    url: http://157.230.113.38:8081/
+    _comment: "pg-meta: /pg-meta/* -> http://meta:8080/*"
+    url: http://meta:8080/
     routes:
       - name: pg-meta-all
         strip_path: true
