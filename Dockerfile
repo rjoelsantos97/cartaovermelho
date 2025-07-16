@@ -9,13 +9,16 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Copy cloud environment variables
+COPY .env.cloud .env.local
 
 # Environment variables must be present at build time
 # https://nextjs.org/docs/basic-features/environment-variables#exposing-environment-variables-to-the-browser
@@ -24,12 +27,23 @@ ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG SUPABASE_SERVICE_KEY
 ARG OPENROUTER_API_KEY
 ARG NEXT_PUBLIC_SITE_URL
+ARG ADMIN_EMAIL
+ARG ADMIN_PASSWORD
+ARG DEBUG
 
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 ENV SUPABASE_SERVICE_KEY=$SUPABASE_SERVICE_KEY
 ENV OPENROUTER_API_KEY=$OPENROUTER_API_KEY
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV ADMIN_EMAIL=$ADMIN_EMAIL
+ENV ADMIN_PASSWORD=$ADMIN_PASSWORD
+ENV DEBUG=$DEBUG
+
+# Debug: Check environment
+RUN echo "=== Environment Check ===" && \
+    echo "NODE_ENV: $NODE_ENV" && \
+    echo "NEXT_PUBLIC_SUPABASE_URL: $NEXT_PUBLIC_SUPABASE_URL"
 
 # Build the application
 RUN npm run build
@@ -52,6 +66,9 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy environment variables to runtime
+COPY --from=builder --chown=nextjs:nodejs /app/.env.local ./.env.local
 
 # Install Puppeteer dependencies
 RUN apk add --no-cache \

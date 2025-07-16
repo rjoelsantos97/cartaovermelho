@@ -3,11 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, User, ExternalLink } from 'lucide-react';
-import { NewsTabs } from '@/components/common';
+import { NewsTabs, Header } from '@/components/common';
 import { DramaScore } from '@/components/articles';
 import ReactMarkdown from 'react-markdown';
 
-async function getDynamicCategories(): Promise<{id: string, name: string, active: boolean}[]> {
+async function getTop7Categories(): Promise<{id: string, name: string, active: boolean}[]> {
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -19,33 +19,38 @@ async function getDynamicCategories(): Promise<{id: string, name: string, active
 
   if (error) {
     console.error('Error fetching categories:', error);
-    // Return default categories on error
+    // Return top categories based on database analysis
     return [
-      { id: 'all', name: 'Todas', active: false },
-      { id: 'futebol', name: 'Futebol', active: false },
-      { id: 'outros desportos', name: 'Outros Desportos', active: false },
-      { id: 'internacional', name: 'Internacional', active: false },
+      { id: 'futebol-portugues', name: 'Futebol Português', active: false },
+      { id: 'desporto', name: 'Desporto', active: false },
+      { id: 'futebol-italiano', name: 'Futebol Italiano', active: false },
+      { id: 'transferencias', name: 'Transferências', active: false },
+      { id: 'sporting', name: 'Sporting', active: false },
+      { id: 'futebol-amador', name: 'Futebol Amador', active: false },
+      { id: 'internacional', name: 'Internacional', active: false }
     ];
   }
 
-  // Get unique categories
-  const uniqueCategories = [...new Set(data?.map(item => item.category) || [])];
-  
-  // Create category objects
-  const categories = uniqueCategories
-    .filter(cat => cat && cat.trim() !== '')
-    .sort((a, b) => a.localeCompare(b, 'pt-PT'))
-    .map(category => ({
-      id: category.toLowerCase(),
-      name: category,
-      active: false
-    }));
+  // Count occurrences of each category
+  const categoryCount: { [key: string]: number } = {};
+  data.forEach(item => {
+    const cat = item.category;
+    if (cat && cat.trim()) {
+      categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+    }
+  });
 
-  // Always include 'all' as first option
-  return [
-    { id: 'all', name: 'Todas', active: false },
-    ...categories
-  ];
+  // Sort by count and get top 7
+  const sortedCategories = Object.entries(categoryCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7);
+
+  // Create category objects (no "Todas" category)
+  return sortedCategories.map(([category]) => ({
+    id: category.toLowerCase().replace(/\s+/g, '-'),
+    name: category,
+    active: false
+  }));
 }
 
 interface ArticlePageProps {
@@ -219,49 +224,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const displayArticle = article || mockArticle;
 
-  // Get dynamic categories for navigation
-  const dynamicCategories = await getDynamicCategories();
-  const categories = dynamicCategories.map(cat => ({ ...cat, active: false }));
+  // Get top 7 categories for navigation
+  const topCategories = await getTop7Categories();
+  const categories = topCategories.map(cat => ({ ...cat, active: false }));
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Same as homepage */}
-      <header className="bg-white border-b border-gray-100">
-        <div className="container mx-auto px-4">
-          
-          {/* Main header */}
-          <div className="flex items-center justify-between py-4">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-              <div className="w-10 h-14 bg-red-600 rounded-lg shadow-xl transform rotate-12 hover:rotate-6 transition-transform duration-200">
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black text-gray-900 tracking-tight bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
-                  Cartão Vermelho
-                </span>
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sports Drama
-                </span>
-              </div>
-            </Link>
-            
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={category.id === 'all' ? '/' : `/?category=${category.id}`}
-                  className={`font-medium hover:text-oxford-blue transition-colors ${
-                    category.active ? 'text-oxford-blue' : 'text-gray-600'
-                  }`}
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </nav>
-            
-          </div>
-        </div>
-      </header>
+      {/* Header */}
+      <Header showCategories={true} categories={categories} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

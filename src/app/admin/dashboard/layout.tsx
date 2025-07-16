@@ -47,11 +47,17 @@ export default function DashboardLayout({
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
-                    <span className="font-bold text-black text-sm">CV</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-11 bg-red-600 rounded-lg shadow-xl transform rotate-12">
                   </div>
-                  <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                  <div className="flex flex-col">
+                    <span className="text-lg font-black text-gray-900 tracking-tight bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+                      Cartão Vermelho
+                    </span>
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Admin Dashboard
+                    </span>
+                  </div>
                 </div>
               </div>
               

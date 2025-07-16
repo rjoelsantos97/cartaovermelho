@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { DramaticCard } from '@/components/articles';
-import { BreakingNewsBanner, NewsTabs, InfinityScroll } from '@/components/common';
+import { BreakingNewsBanner, NewsTabs, InfinityScroll, Header } from '@/components/common';
 import Link from 'next/link';
 
 interface ProcessedArticle {
@@ -55,7 +55,7 @@ async function getPublishedArticles(): Promise<ProcessedArticle[]> {
   return data || [];
 }
 
-async function getDynamicCategories(): Promise<{id: string, name: string, active: boolean}[]> {
+async function getTop7Categories(): Promise<{id: string, name: string, active: boolean}[]> {
   const supabase = await createClient();
   
   const { data, error } = await supabase
@@ -67,33 +67,38 @@ async function getDynamicCategories(): Promise<{id: string, name: string, active
 
   if (error) {
     console.error('Error fetching categories:', error);
-    // Return default categories on error
+    // Return top categories based on database analysis
     return [
-      { id: 'all', name: 'Todas', active: false },
-      { id: 'futebol', name: 'Futebol', active: false },
-      { id: 'outros desportos', name: 'Outros Desportos', active: false },
-      { id: 'internacional', name: 'Internacional', active: false },
+      { id: 'futebol-portugues', name: 'Futebol Português', active: false },
+      { id: 'desporto', name: 'Desporto', active: false },
+      { id: 'futebol-italiano', name: 'Futebol Italiano', active: false },
+      { id: 'transferencias', name: 'Transferências', active: false },
+      { id: 'sporting', name: 'Sporting', active: false },
+      { id: 'futebol-amador', name: 'Futebol Amador', active: false },
+      { id: 'internacional', name: 'Internacional', active: false }
     ];
   }
 
-  // Get unique categories
-  const uniqueCategories = [...new Set(data?.map(item => item.category) || [])];
-  
-  // Create category objects
-  const categories = uniqueCategories
-    .filter(cat => cat && cat.trim() !== '')
-    .sort((a, b) => a.localeCompare(b, 'pt-PT'))
-    .map(category => ({
-      id: category.toLowerCase(),
-      name: category,
-      active: false
-    }));
+  // Count occurrences of each category
+  const categoryCount: { [key: string]: number } = {};
+  data.forEach(item => {
+    const cat = item.category;
+    if (cat && cat.trim()) {
+      categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+    }
+  });
 
-  // Always include 'all' as first option
-  return [
-    { id: 'all', name: 'Todas', active: false },
-    ...categories
-  ];
+  // Sort by count and get top 7
+  const sortedCategories = Object.entries(categoryCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7);
+
+  // Create category objects (no "Todas" category)
+  return sortedCategories.map(([category]) => ({
+    id: category.toLowerCase().replace(/\s+/g, '-'),
+    name: category,
+    active: false
+  }));
 }
 
 
@@ -102,9 +107,9 @@ interface HomePageProps {
 }
 
 export default async function PublicHome({ searchParams }: HomePageProps) {
-  const selectedCategory = searchParams.category || 'all';
+  const selectedCategory = searchParams.category;
   const articles = await getPublishedArticles();
-  const dynamicCategories = await getDynamicCategories();
+  const topCategories = await getTop7Categories();
 
   // Mock data for development if no articles
   const mockArticles = articles.length === 0 ? [
@@ -179,14 +184,14 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
     : mockArticles;
 
   // Filter articles by category
-  const displayArticles = selectedCategory === 'all' 
+  const displayArticles = !selectedCategory 
     ? allDisplayArticles 
     : allDisplayArticles.filter(article => {
-        return article.category.toLowerCase() === selectedCategory.toLowerCase();
+        return article.category.toLowerCase().replace(/\s+/g, '-') === selectedCategory.toLowerCase();
       });
 
   // Set active category based on selected category
-  const categories = dynamicCategories.map(cat => ({
+  const categories = topCategories.map(cat => ({
     ...cat,
     active: cat.id === selectedCategory
   }));
@@ -225,42 +230,7 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100">
-        <div className="container mx-auto px-4">
-          
-          {/* Main header */}
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-14 bg-red-600 rounded-lg shadow-xl transform rotate-12 hover:rotate-6 transition-transform duration-200">
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black text-gray-900 tracking-tight bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
-                  Cartão Vermelho
-                </span>
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sports Drama
-                </span>
-              </div>
-            </div>
-            
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={category.id === 'all' ? '/' : `/?category=${category.id}`}
-                  className={`font-medium hover:text-oxford-blue transition-colors ${
-                    category.active ? 'text-oxford-blue' : 'text-gray-600'
-                  }`}
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </nav>
-            
-          </div>
-        </div>
-      </header>
+      <Header showCategories={true} categories={categories} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">

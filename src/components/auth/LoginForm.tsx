@@ -53,11 +53,17 @@ export function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
-              <span className="font-bold text-black">CV</span>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-10 h-14 bg-red-600 rounded-lg shadow-xl transform rotate-12">
             </div>
-            <span className="text-xl font-bold text-gray-900">Cartão Vermelho</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-black text-gray-900 tracking-tight bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+                Cartão Vermelho
+              </span>
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Sports Drama
+              </span>
+            </div>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
           <p className="text-gray-600 mt-2">Entre para aceder ao dashboard</p>
