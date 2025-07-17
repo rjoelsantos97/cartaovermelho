@@ -4,7 +4,7 @@
  */
 
 export function generateSiteNavigationStructuredData(): Record<string, any> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for SEO
   
   return {
     '@context': 'https://schema.org',
@@ -31,7 +31,7 @@ export function generateSiteNavigationStructuredData(): Record<string, any> {
 }
 
 export function generateCollectionPageStructuredData(): Record<string, any> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for SEO
   
   return {
     '@context': 'https://schema.org',

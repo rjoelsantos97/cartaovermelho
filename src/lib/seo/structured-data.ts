@@ -9,7 +9,7 @@ export function generateArticleStructuredData(
   article: ArticleMetadata,
   slug: string
 ): Record<string, any> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for SEO
   const articleUrl = `${siteUrl}/article/${slug}`;
   
   return {
@@ -73,7 +73,7 @@ export function generateArticleStructuredData(
 }
 
 export function generateOrganizationStructuredData(): Record<string, any> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for SEO
   
   return {
     '@context': 'https://schema.org',
@@ -118,7 +118,7 @@ export function generateOrganizationStructuredData(): Record<string, any> {
 }
 
 export function generateWebSiteStructuredData(): Record<string, any> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for SEO
   
   return {
     '@context': 'https://schema.org',
@@ -170,7 +170,7 @@ export function generateBreadcrumbStructuredData(
   articleTitle: string,
   articleSlug: string
 ): Record<string, any> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for SEO
   
   return {
     '@context': 'https://schema.org',

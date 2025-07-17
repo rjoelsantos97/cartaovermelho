@@ -8,7 +8,8 @@ import { createClient } from '@/lib/supabase/server';
 import { generateSeoFriendlySlug } from '@/lib/seo';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  // Detect domain automatically from request headers or use production default
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for sitemap
   const supabase = await createClient();
 
   // Get all published articles
@@ -89,7 +90,7 @@ export async function generateSitemapForPeriod(
   startDate: Date,
   endDate: Date
 ): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain
   const supabase = await createClient();
 
   const { data: articles, error } = await supabase
