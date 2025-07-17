@@ -6,17 +6,18 @@
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    // Replace Portuguese special characters
-    .replace(/[àáâãä]/g, 'a')
+    // Replace Portuguese special characters - COMPREHENSIVE
+    .replace(/[àáâãäåæ]/g, 'a')
     .replace(/[èéêë]/g, 'e')
     .replace(/[ìíîï]/g, 'i')
-    .replace(/[òóôõö]/g, 'o')
+    .replace(/[òóôõöø]/g, 'o')
     .replace(/[ùúûü]/g, 'u')
     .replace(/[ç]/g, 'c')
     .replace(/[ñ]/g, 'n')
     .replace(/[ý]/g, 'y')
-    // Remove other special characters and replace with spaces
-    .replace(/[^\w\s-]/g, ' ')
+    .replace(/[đ]/g, 'd')
+    // Remove ALL non-alphanumeric characters except spaces and hyphens
+    .replace(/[^a-z0-9\s-]/g, '')
     // Replace multiple spaces with single space
     .replace(/\s+/g, ' ')
     // Trim and replace spaces with hyphens
@@ -25,11 +26,11 @@ export function generateSlug(title: string): string {
     // Remove multiple consecutive hyphens
     .replace(/-+/g, '-')
     // Remove leading/trailing hyphens
-    .replace(/^-|-$/g, '')
+    .replace(/^-+|-+$/g, '')
     // Limit length to 100 characters for optimal SEO
     .substring(0, 100)
     // Remove trailing hyphen if substring cut in the middle
-    .replace(/-$/, '');
+    .replace(/-+$/, '');
 }
 
 export function generateSeoFriendlySlug(title: string): string {
