@@ -2,25 +2,25 @@ version: '3.8'
 
 services:
   cartao-vermelho:
-    image: rjoelsantos97/cartao-vermelho:cloud
+    image: ${DOCKER_IMAGE:-rjoelsantos97/cartao-vermelho:cloud}
     container_name: cartao-vermelho-app
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
       # Supabase Cloud Configuration
-      NEXT_PUBLIC_SUPABASE_URL: "https://nuorgwshhsmrtjirnohv.supabase.co"
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3Jnd3NoaHNtcnRqaXJub2h2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI3MDQ5MTgsImV4cCI6MjA2ODI4MDkxOH0.J6LQSP3bDGGQhTOHRoBk_Ygu56q94J6x-QIxBFSt1HA"
-      SUPABASE_SERVICE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3Jnd3NoaHNtcnRqaXJub2h2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjcwNDkxOCwiZXhwIjoyMDY4MjgwOTE4fQ.uOvFF6AV3qowD6mPhtgS4D990Z4DpzDR6TS4VTs8y_A"
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
       
       # OpenRouter API
-      OPENROUTER_API_KEY: "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"
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       
-      # Site URL (adjust for your domain)
-      NEXT_PUBLIC_SITE_URL: "https://cartaovermelho.pt"
+      # Site URL
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://cartaovermelho.pt}
       
       # Admin user configuration
-      ADMIN_EMAIL: "admin@cartaovermelho.pt"
-      ADMIN_PASSWORD: "admin123"
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@cartaovermelho.pt}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       
       # Debug mode
       DEBUG: "false"
