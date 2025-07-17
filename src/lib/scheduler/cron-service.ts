@@ -19,20 +19,11 @@ export class CronService {
       console.log('🕐 Iniciando pipeline automática...');
       
       try {
-        const response = await fetch(`http://127.0.0.1:3000/api/run-pipeline`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
-          }
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log('✅ Pipeline automática concluída:', result);
-        } else {
-          console.error('❌ Erro na pipeline automática:', await response.text());
-        }
+        // Import and call the pipeline service directly instead of HTTP fetch
+        const { processingService } = await import('@/lib/llm/processing-service');
+        
+        const result = await processingService.runFullPipeline();
+        console.log('✅ Pipeline automática concluída:', result);
       } catch (error) {
         console.error('❌ Erro ao executar pipeline automática:', error);
       }
@@ -57,20 +48,11 @@ export class CronService {
       console.log('🕐 Iniciando scraping automático...');
       
       try {
-        const response = await fetch(`http://127.0.0.1:3000/api/test-scraping-only`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
-          }
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log('✅ Scraping automático concluído:', result);
-        } else {
-          console.error('❌ Erro no scraping automático:', await response.text());
-        }
+        // Import and call the scraping service directly instead of HTTP fetch
+        const { scrapingService } = await import('@/lib/scraping/scraping-service');
+        
+        const result = await scrapingService.runFullScraping();
+        console.log('✅ Scraping automático concluído:', result);
       } catch (error) {
         console.error('❌ Erro ao executar scraping automático:', error);
       }
@@ -172,20 +154,11 @@ export class CronService {
     console.log('🔧 Executando pipeline manual...');
     
     try {
-      const response = await fetch(`http://127.0.0.1:3000/api/run-pipeline`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
-        }
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Pipeline manual concluída:', result);
-      } else {
-        console.error('❌ Erro na pipeline manual:', await response.text());
-      }
+      // Import and call the pipeline service directly instead of HTTP fetch
+      const { processingService } = await import('@/lib/llm/processing-service');
+      
+      const result = await processingService.runFullPipeline();
+      console.log('✅ Pipeline manual concluída:', result);
     } catch (error) {
       console.error('❌ Erro ao executar pipeline manual:', error);
       throw error;
@@ -196,20 +169,11 @@ export class CronService {
     console.log('🔧 Executando scraping manual...');
     
     try {
-      const response = await fetch(`http://127.0.0.1:3000/api/test-scraping-only`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
-        }
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Scraping manual concluído:', result);
-      } else {
-        console.error('❌ Erro no scraping manual:', await response.text());
-      }
+      // Import and call the scraping service directly instead of HTTP fetch
+      const { scrapingService } = await import('@/lib/scraping/scraping-service');
+      
+      const result = await scrapingService.runFullScraping();
+      console.log('✅ Scraping manual concluído:', result);
     } catch (error) {
       console.error('❌ Erro ao executar scraping manual:', error);
       throw error;
