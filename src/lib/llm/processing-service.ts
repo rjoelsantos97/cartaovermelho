@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { OpenRouterClient, type ProcessingResult, type ArticleToProcess } from './openrouter-client';
+import { scrapingService } from '@/lib/scraping/scraping-service';
 
 export interface ProcessingJob {
   id: string;
@@ -377,9 +378,7 @@ export class ProcessingService {
     try {
       console.log('🚀 Iniciando pipeline completo: Scraping + LLM...');
       
-      // Import ScrapingService dynamically to avoid circular dependencies
-      const { ScrapingService } = await import('@/lib/scraping/scraping-service');
-      const scrapingService = new ScrapingService();
+      // Use the imported singleton instance directly
       
       // Step 1: Run scraping job
       console.log('📰 Passo 1: Executando scraping...');
