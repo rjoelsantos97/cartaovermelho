@@ -16,7 +16,7 @@ services:
       OPENROUTER_API_KEY: "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"
       
       # Site URL (adjust for your domain)
-      NEXT_PUBLIC_SITE_URL: "https://cartaovermelho.pt"
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
       
       # Admin user configuration
       ADMIN_EMAIL: "admin@cartaovermelho.pt"
