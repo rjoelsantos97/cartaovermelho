@@ -55,7 +55,7 @@ export default function DashboardLayout({
                       Cartão Vermelho
                     </span>
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Admin Dashboard
+                      Dasboard de Admin
                     </span>
                   </div>
                 </div>

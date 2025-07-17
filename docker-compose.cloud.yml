@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   cartao-vermelho:
-    image: ${DOCKER_IMAGE:-rjoelsantos97/cartao-vermelho:cloud}
+    image: rjoelsantos97/cartao-vermelho:cloud
     container_name: cartao-vermelho-app
     ports:
       - "${PORT:-3000}:3000"
