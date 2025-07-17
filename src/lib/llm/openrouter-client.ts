@@ -108,7 +108,7 @@ Transformar notícias desportivas sérias em espetáculos sensacionalistas e inv
 • **Criatividade**: Inventa metáforas ÚNICAS baseadas no conteúdo específico de cada notícia
 
 ## ELEMENTOS OBRIGATÓRIOS - CRIATIVIDADE MÁXIMA:
-• **Títulos alarmistas** com trocadilhos ESPECÍFICOS ao conteúdo (não apenas futebolísticos)
+• **Títulos curtos e informativos** (6-8 palavras) com trocadilhos ESPECÍFICOS ao conteúdo, sem abuso de maiúsculas
 • **Metáforas personalizadas**: Cria comparações únicas baseadas na notícia específica
 • **Expressões dramáticas adaptadas**: "DRAMA TOTAL", "CAOS", "BOMBA", "NÃO PERDOOU", "CHOQUE" + versões criativas
 • **Linguagem contextual**: Se é ténis, usa "ACE!", "MATCH POINT!"; se é basquetebol, usa "ENTERRADA!", "TRIPLO DUPLO!"
@@ -155,12 +155,12 @@ RELEMBRAR: Somos o "Cartão Vermelho" - onde cada notícia é um ESPETÁCULO ÚN
 
 IMPORTANTE: Responda APENAS com JSON válido, sem texto adicional antes ou depois. Use esta estrutura exata:
 {
-  "dramaticTitle": "Título sensacionalista com metáforas e trocadilhos ESPECÍFICOS ao conteúdo",
+  "dramaticTitle": "Título curto (6-8 palavras) informativo e dramático, sem excesso de maiúsculas",
   "dramaticExcerpt": "Subtítulo ÚNICO que resume o drama de forma diferente do primeiro parágrafo - deve ser uma frase curta e impactante",
   "dramaticContent": "Conteúdo completo estruturado em várias secções dramáticas com criatividade contextual",
   "dramaScore": number (1-10),
   "urgencyLevel": "low|medium|high|breaking",
-  "category": "categoria determinada pelo conteúdo",
+  "category": "categoria CONCISA (1-2 palavras máximo) determinada pelo conteúdo REAL",
   "tags": ["tag1", "tag2"],
   "processingNotes": "notas opcionais"
 }`;
@@ -203,15 +203,15 @@ INSTRUÇÕES ESPECÍFICAS:
 - CRITICAL: O "dramaticExcerpt" deve ser DIFERENTE do primeiro parágrafo do "dramaticContent"
 - O excerpt é um resumo impactante, o primeiro parágrafo é o lead da notícia
 
-CATEGORIZAÇÃO DINÂMICA - LIBERDADE TOTAL:
+CATEGORIZAÇÃO DINÂMICA - MÁXIMO 1-2 PALAVRAS:
 - **IGNORA COMPLETAMENTE** a categoria original - ela é irrelevante
 - **ANALISA PROFUNDAMENTE** o título, resumo e conteúdo para determinar o desporto/tema REAL
-- **CRIA CATEGORIAS DESCRITIVAS** baseadas no que a notícia realmente aborda
-- **SÊ CRIATIVO** - não te limites a categorias pré-definidas
+- **CRIA CATEGORIAS ULTRA-CONCISAS** (1-2 palavras máximo) baseadas no que a notícia realmente aborda
+- **SÊ DIRETO** - categorias devem ser imediatas e claras
 
-EXEMPLOS DE CATEGORIZAÇÃO DINÂMICA:
-• Se é sobre Cristiano Ronaldo no Al-Nassr → "Futebol Internacional"
-• Se é sobre Benfica vs Porto → "Futebol Português" 
+EXEMPLOS DE CATEGORIZAÇÃO CONCISA:
+• Se é sobre Cristiano Ronaldo no Al-Nassr → "Futebol"
+• Se é sobre Benfica vs Porto → "Futebol" 
 • Se é sobre NBA → "Basquetebol"
 • Se é sobre Rafael Nadal → "Ténis"
 • Se é sobre Miguel Oliveira → "Motociclismo"
@@ -225,11 +225,11 @@ EXEMPLOS DE CATEGORIZAÇÃO DINÂMICA:
 
 INSTRUÇÕES CRÍTICAS:
 - **LÊ O CONTEÚDO REAL** da notícia antes de categorizar
-- **SÊ ESPECÍFICO** - "Ténis" é melhor que "Desportos de Raquete"
-- **CRIA A CATEGORIA** que melhor descreve o conteúdo
-- **NÃO TE LIMITES** - podes criar categorias novas se necessário
+- **MÁXIMO 1-2 PALAVRAS** - "Ténis" não "Desportos de Raquete"
+- **CRIA A CATEGORIA** mais direta que descreve o conteúdo
+- **SÊ CONCISO** - evita palavras desnecessárias
 - **NUNCA uses "Futebol" por defeito** - analisa o conteúdo REAL
-- **PRIORIZA PRECISÃO** - é melhor ser específico que genérico
+- **PRIORIZA CLAREZA** - categoria deve ser instantaneamente compreensível
 
 Responda em JSON válido conforme o formato especificado.`;
   }
@@ -278,7 +278,7 @@ Responda em JSON válido conforme o formato especificado.`;
       }
 
       return {
-        dramaticTitle: this.cleanMarkdown(parsed.dramaticTitle.substring(0, 200)),
+        dramaticTitle: this.cleanMarkdown(parsed.dramaticTitle.substring(0, 120)), // Adjusted for 6-8 words
         dramaticExcerpt: this.cleanMarkdown(parsed.dramaticExcerpt || parsed.dramaticTitle),
         dramaticContent: this.cleanMarkdown(parsed.dramaticContent),
         dramaScore,
