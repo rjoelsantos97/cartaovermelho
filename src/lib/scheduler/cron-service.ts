@@ -19,7 +19,7 @@ export class CronService {
       console.log('🕐 Iniciando pipeline automática...');
       
       try {
-        const response = await fetch(`http://localhost:3000/api/run-pipeline`, {
+        const response = await fetch(`http://127.0.0.1:3000/api/run-pipeline`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export class CronService {
       console.log('🕐 Iniciando scraping automático...');
       
       try {
-        const response = await fetch(`http://localhost:3000/api/test-scraping-only`, {
+        const response = await fetch(`http://127.0.0.1:3000/api/test-scraping-only`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ export class CronService {
     console.log('🔧 Executando pipeline manual...');
     
     try {
-      const response = await fetch(`http://localhost:3000/api/run-pipeline`, {
+      const response = await fetch(`http://127.0.0.1:3000/api/run-pipeline`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ export class CronService {
     console.log('🔧 Executando scraping manual...');
     
     try {
-      const response = await fetch(`http://localhost:3000/api/test-scraping-only`, {
+      const response = await fetch(`http://127.0.0.1:3000/api/test-scraping-only`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
