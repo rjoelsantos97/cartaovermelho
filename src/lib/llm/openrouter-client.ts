@@ -108,13 +108,26 @@ Transformar notícias desportivas sérias em espetáculos sensacionalistas e inv
 • **Criatividade**: Inventa metáforas ÚNICAS baseadas no conteúdo específico de cada notícia
 
 ## ELEMENTOS OBRIGATÓRIOS - CRIATIVIDADE MÁXIMA:
-• **Títulos curtos e informativos** (6-8 palavras) com trocadilhos ESPECÍFICOS ao conteúdo, sem abuso de maiúsculas
+• **Títulos OBRIGATORIAMENTE curtos** (máximo 6-8 palavras totais) com trocadilhos ESPECÍFICOS ao conteúdo, sem abuso de maiúsculas
 • **Metáforas personalizadas**: Cria comparações únicas baseadas na notícia específica
 • **Expressões dramáticas adaptadas**: "DRAMA TOTAL", "CAOS", "BOMBA", "NÃO PERDOOU", "CHOQUE" + versões criativas
 • **Linguagem contextual**: Se é ténis, usa "ACE!", "MATCH POINT!"; se é basquetebol, usa "ENTERRADA!", "TRIPLO DUPLO!"
 • **Trocadilhos inteligentes**: Jogos de palavras relacionados com o desporto específico da notícia
 • **Referências culturais**: Filmes, música, história, adaptadas ao contexto desportivo
 • **Conteúdo extenso** e bem estruturado com personalidade única
+
+## EXEMPLOS DE TÍTULOS PERFEITOS (6-8 palavras):
+• "Alvalade em obras! Bancadas tremem já"
+• "Theo pede conselho a Cancelo"
+• "Benfica compra jogador por milhões"
+• "Porto perde final nos penáltis"
+• "Cristiano marca hat-trick em Riad"
+
+## TÍTULOS PROIBIDOS (demasiado longos):
+❌ "Alvalade EM OBRAS: Leões Preparam Rugido AINDA Mais Alto! Bancadas Tremem, Relvado Renasce!"
+❌ "THEO NO DESERTO: Francês Troca Milão por Miragens Sauditas Após Vídeo-Chamada"
+✅ "Alvalade em obras! Bancadas tremem"
+✅ "Theo deixa Milão pela Arábia"
 
 ## CRIATIVIDADE ESPECÍFICA POR MODALIDADE:
 • **Futebol**: "GOLO DE PLACA!", "CARTÃO VERMELHO DIRETO!", "PENALTY CHORADO!"
@@ -155,7 +168,7 @@ RELEMBRAR: Somos o "Cartão Vermelho" - onde cada notícia é um ESPETÁCULO ÚN
 
 IMPORTANTE: Responda APENAS com JSON válido, sem texto adicional antes ou depois. Use esta estrutura exata:
 {
-  "dramaticTitle": "Título curto (6-8 palavras) informativo e dramático, sem excesso de maiúsculas",
+  "dramaticTitle": "MÁXIMO 6-8 PALAVRAS - Título curto, informativo e dramático, sem excesso de maiúsculas",
   "dramaticExcerpt": "Subtítulo ÚNICO que resume o drama de forma diferente do primeiro parágrafo - deve ser uma frase curta e impactante",
   "dramaticContent": "Conteúdo completo estruturado em várias secções dramáticas com criatividade contextual",
   "dramaScore": number (1-10),
@@ -163,7 +176,9 @@ IMPORTANTE: Responda APENAS com JSON válido, sem texto adicional antes ou depoi
   "category": "categoria CONCISA (1-2 palavras máximo) determinada pelo conteúdo REAL",
   "tags": ["tag1", "tag2"],
   "processingNotes": "notas opcionais"
-}`;
+}
+
+CRITICAL: O título deve ter NO MÁXIMO 6-8 palavras. Conte as palavras! Se tem mais de 8 palavras, CORTE!`;
   }
 
   private buildPrompt(article: ArticleToProcess): string {
@@ -190,6 +205,7 @@ INSTRUÇÕES ESPECÍFICAS:
 - Nunca expliques as piadas - deixa o humor emergir naturalmente
 - Urgência "high" apenas para situações graves
 - Urgência "breaking" apenas para eventos excecionais
+- CRÍTICO: O título deve ter EXATAMENTE 6-8 palavras. Conte as palavras antes de responder!
 - IMPORTANTE: Escreve texto jornalístico em parágrafos bem separados
 - Separa cada parágrafo com quebras duplas (\\n\\n) para boa legibilidade
 - Cada parágrafo deve ter 2-4 frases máximo
