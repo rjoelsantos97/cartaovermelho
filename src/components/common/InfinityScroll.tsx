@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { generateSeoFriendlySlug } from '@/lib/seo';
 
 interface Article {
   id: string;
@@ -12,6 +13,7 @@ interface Article {
   publishedAt: string;
   dramaScore: number;
   imageUrl?: string;
+  slug?: string;
 }
 
 interface InfinityScrollProps {
@@ -76,8 +78,10 @@ export function InfinityScroll({ initialArticles, category = 'all' }: InfinitySc
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {articles.map((article) => (
-          <Link key={article.id} href={`/article/${article.id}`}>
+        {articles.map((article) => {
+          const articleSlug = article.slug || generateSeoFriendlySlug(article.title);
+          return (
+          <Link key={article.id} href={`/article/${articleSlug}`}>
             <div className="group cursor-pointer">
               <div className="relative rounded-lg overflow-hidden mb-4 h-40">
                 {article.imageUrl ? (
@@ -100,7 +104,8 @@ export function InfinityScroll({ initialArticles, category = 'all' }: InfinitySc
               </div>
             </div>
           </Link>
-        ))}
+          );
+        })}
       </div>
       
       {/* Loading indicator and intersection observer target */}

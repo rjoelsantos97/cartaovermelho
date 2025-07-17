@@ -2,17 +2,19 @@ import { createClient } from '@/lib/supabase/server';
 import { DramaticCard } from '@/components/articles';
 import { BreakingNewsBanner, NewsTabs, InfinityScroll, Header } from '@/components/common';
 import Link from 'next/link';
+import { generateSeoFriendlySlug } from '@/lib/seo';
 
 interface ProcessedArticle {
   id: string;
   title: string;
   content: string;
-  excerpt?: string; // Add excerpt field
+  excerpt?: string;
   drama_score: number;
   urgency_level: 'low' | 'medium' | 'high' | 'breaking';
   category: string;
   processed_at: string;
   is_published: boolean;
+  slug?: string;
   original_articles: {
     url: string;
     image_url?: string;
@@ -36,6 +38,7 @@ async function getPublishedArticles(): Promise<ProcessedArticle[]> {
       category,
       processed_at,
       is_published,
+      slug,
       original_articles (
         url,
         image_url,
@@ -175,7 +178,8 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
           category: article.category,
           publishedAt: article.original_articles?.published_at || article.processed_at,
           dramaScore: Number(article.drama_score),
-          imageUrl: article.original_articles?.image_url
+          imageUrl: article.original_articles?.image_url,
+          slug: article.slug
         };
         
         
@@ -211,7 +215,8 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
     category: article.category,
     urgency: article.urgency,
     imageUrl: article.imageUrl,
-    publishedAt: article.publishedAt
+    publishedAt: article.publishedAt,
+    slug: article.slug
   }));
 
   const tabsUrgentArticles = urgentArticles.slice(0, 5).map(article => ({
@@ -220,7 +225,8 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
     category: article.category,
     urgency: article.urgency,
     imageUrl: article.imageUrl,
-    publishedAt: article.publishedAt
+    publishedAt: article.publishedAt,
+    slug: article.slug
   }));
 
 
@@ -252,7 +258,7 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
                 {/* Hero Article */}
                 {featuredArticle && (
                   <section>
-                    <Link href={`/article/${featuredArticle.id}`}>
+                    <Link href={`/article/${featuredArticle.slug || generateSeoFriendlySlug(featuredArticle.title)}`}>
                       <div className="relative bg-black rounded-xl overflow-hidden h-96 group cursor-pointer">
                         {featuredArticle.imageUrl ? (
                           <img
@@ -286,8 +292,10 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {recentArticles.map((article) => (
-                      <Link key={article.id} href={`/article/${article.id}`}>
+                    {recentArticles.map((article) => {
+                      const articleSlug = article.slug || generateSeoFriendlySlug(article.title);
+                      return (
+                      <Link key={article.id} href={`/article/${articleSlug}`}>
                         <div className="group cursor-pointer">
                           <div className="relative rounded-lg overflow-hidden mb-4 h-48">
                             {article.imageUrl ? (
@@ -310,7 +318,8 @@ export default async function PublicHome({ searchParams }: HomePageProps) {
                           </div>
                         </div>
                       </Link>
-                    ))}
+                      );
+                    })}
                   </div>
                 </section>
 

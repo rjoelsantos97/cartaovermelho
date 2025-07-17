@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
         category,
         processed_at,
         is_published,
+        slug,
         original_articles (
           url,
           image_url,

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { generateSeoFriendlySlug } from '@/lib/seo';
 
 interface Article {
   id: string;
@@ -10,6 +11,7 @@ interface Article {
   urgency: 'low' | 'medium' | 'high' | 'breaking';
   imageUrl?: string;
   publishedAt: string;
+  slug?: string;
 }
 
 interface NewsTabsProps {
@@ -62,8 +64,10 @@ export function NewsTabs({ recentArticles, urgentArticles }: NewsTabsProps) {
       <div className="p-6 space-y-5">
         {currentTab === 'recent' && (
           <>
-            {recentArticles.length > 0 ? recentArticles.map((article) => (
-              <Link key={article.id} href={`/article/${article.id}`}>
+            {recentArticles.length > 0 ? recentArticles.map((article) => {
+              const articleSlug = article.slug || generateSeoFriendlySlug(article.title);
+              return (
+              <Link key={article.id} href={`/article/${articleSlug}`}>
                 <div className="flex gap-4 group cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-all duration-200">
                   {article.imageUrl && (
                     <img
@@ -82,7 +86,8 @@ export function NewsTabs({ recentArticles, urgentArticles }: NewsTabsProps) {
                   </div>
                 </div>
               </Link>
-            )) : (
+              );
+            }) : (
               <div className="text-center text-gray-500 py-8">
                 <p className="text-sm">Nenhuma notícia recente</p>
               </div>
@@ -92,8 +97,10 @@ export function NewsTabs({ recentArticles, urgentArticles }: NewsTabsProps) {
         
         {currentTab === 'urgent' && (
           <>
-            {urgentArticles.length > 0 ? urgentArticles.map((article) => (
-              <Link key={article.id} href={`/article/${article.id}`}>
+            {urgentArticles.length > 0 ? urgentArticles.map((article) => {
+              const articleSlug = article.slug || generateSeoFriendlySlug(article.title);
+              return (
+              <Link key={article.id} href={`/article/${articleSlug}`}>
                 <div className="flex gap-4 group cursor-pointer p-3 rounded-lg hover:bg-red-50 transition-all duration-200">
                   {article.imageUrl && (
                     <img
@@ -117,7 +124,8 @@ export function NewsTabs({ recentArticles, urgentArticles }: NewsTabsProps) {
                   </div>
                 </div>
               </Link>
-            )) : (
+              );
+            }) : (
               <div className="text-center text-gray-500 py-8">
                 <p className="text-sm">Nenhuma notícia urgente no momento</p>
               </div>

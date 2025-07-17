@@ -6,6 +6,10 @@ import { ArrowLeft, Calendar, User, ExternalLink } from 'lucide-react';
 import { NewsTabs, Header } from '@/components/common';
 import { DramaScore } from '@/components/articles';
 import ReactMarkdown from 'react-markdown';
+import { generateArticleMetadata, generateSeoFriendlySlug } from '@/lib/seo';
+import { generateArticleStructuredData, generateBreadcrumbStructuredData } from '@/lib/seo';
+import { getArticleBySlugOrId } from '@/lib/seo/slug-service';
+import { Metadata } from 'next';
 
 async function getTop7Categories(): Promise<{id: string, name: string, active: boolean}[]> {
   const supabase = await createClient();
@@ -59,18 +63,23 @@ interface ArticlePageProps {
   };
 }
 
+interface ArticlePageSearchParams {
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
 interface ProcessedArticleDetail {
   id: string;
   title: string;
   content: string;
   dramatic_content: string;
-  excerpt?: string; // Add excerpt field
+  excerpt?: string;
   drama_score: number;
   urgency_level: 'low' | 'medium' | 'high' | 'breaking';
   category: string;
   tags: string[];
   processed_at: string;
   is_published: boolean;
+  slug?: string;
   original_articles: {
     title: string;
     url: string;
@@ -84,7 +93,8 @@ interface ProcessedArticleDetail {
 async function getArticle(id: string): Promise<ProcessedArticleDetail | null> {
   const supabase = await createClient();
   
-  const { data, error } = await supabase
+  // Try to get by slug first, then by ID
+  let query = supabase
     .from('processed_articles')
     .select(`
       id,
@@ -98,6 +108,7 @@ async function getArticle(id: string): Promise<ProcessedArticleDetail | null> {
       tags,
       processed_at,
       is_published,
+      slug,
       original_articles (
         title,
         url,
@@ -107,9 +118,18 @@ async function getArticle(id: string): Promise<ProcessedArticleDetail | null> {
         source
       )
     `)
-    .eq('id', id)
-    .eq('is_published', true)
-    .single();
+    .eq('is_published', true);
+
+  // Check if id looks like a UUID (contains hyphens) or a slug
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  
+  if (isUUID) {
+    query = query.eq('id', id);
+  } else {
+    query = query.eq('slug', id);
+  }
+  
+  const { data, error } = await query.single();
 
   if (error) {
     console.error('Error fetching article:', error);
@@ -158,8 +178,25 @@ const urgencyConfig = {
   breaking: { label: 'ÚLTIMA HORA', color: 'bg-red-500' }
 };
 
+// Generate metadata for the article page
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const article = await getArticleBySlugOrId(params.id);
+  
+  if (!article) {
+    return {
+      title: 'Artigo não encontrado | Cartão Vermelho News',
+      description: 'O artigo que procura não foi encontrado.',
+    };
+  }
+
+  // Generate or get existing slug
+  const slug = article.slug || generateSeoFriendlySlug(article.title);
+  
+  return generateArticleMetadata(article, slug);
+}
+
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const article = await getArticle(params.id);
+  const article = await getArticleBySlugOrId(params.id);
   
   if (!article) {
     notFound();
@@ -228,8 +265,33 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const topCategories = await getTop7Categories();
   const categories = topCategories.map(cat => ({ ...cat, active: false }));
 
+  // Generate or get existing slug for structured data
+  const slug = displayArticle.slug || generateSeoFriendlySlug(displayArticle.title);
+  
+  // Generate structured data
+  const articleStructuredData = generateArticleStructuredData(displayArticle, slug);
+  const breadcrumbStructuredData = generateBreadcrumbStructuredData(
+    displayArticle.category,
+    displayArticle.title,
+    slug
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleStructuredData)
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbStructuredData)
+        }}
+      />
+      
       {/* Header */}
       <Header showCategories={true} categories={categories} />
 
@@ -242,7 +304,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Link href="/" className="hover:text-oxford-blue">Home</Link>
                 <span>/</span>
-                <span className="text-oxford-blue">{displayArticle.category}</span>
+                <Link 
+                  href={`/category/${displayArticle.category.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="hover:text-oxford-blue"
+                >
+                  {displayArticle.category}
+                </Link>
+                <span>/</span>
+                <span className="text-oxford-blue truncate">{displayArticle.title}</span>
               </div>
             </nav>
 
@@ -364,8 +433,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   Mais em {displayArticle.category}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {relatedArticles.map((related) => (
-                    <Link key={related.id} href={`/article/${related.id}`}>
+                  {relatedArticles.map((related) => {
+                    const relatedSlug = (related as any).slug || generateSeoFriendlySlug(related.title);
+                    return (
+                    <Link key={related.id} href={`/article/${relatedSlug}`}>
                       <div className="bg-white rounded-lg overflow-hidden hover:shadow-md transition-shadow group">
                         {related.original_articles.image_url && (
                           <img
@@ -384,7 +455,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                         </div>
                       </div>
                     </Link>
-                  ))}
+                  );
+                  })}
                 </div>
               </section>
             )}
