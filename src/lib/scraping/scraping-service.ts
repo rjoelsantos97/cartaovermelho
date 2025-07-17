@@ -276,4 +276,12 @@ export class ScrapingService {
       };
     }
   }
+
+  async runFullScraping(): Promise<ScrapingJob> {
+    // This is just an alias for runScrapingJob to match the expected method name
+    return this.runScrapingJob();
+  }
 }
+
+// Export singleton instance
+export const scrapingService = new ScrapingService();

@@ -19,7 +19,7 @@ export class CronService {
       console.log('🕐 Iniciando pipeline automática...');
       
       try {
-        // Import and call the pipeline service directly instead of HTTP fetch
+        // Import the singleton instance of processing service
         const { processingService } = await import('@/lib/llm/processing-service');
         
         const result = await processingService.runFullPipeline();
@@ -48,7 +48,7 @@ export class CronService {
       console.log('🕐 Iniciando scraping automático...');
       
       try {
-        // Import and call the scraping service directly instead of HTTP fetch
+        // Import the singleton instance of scraping service
         const { scrapingService } = await import('@/lib/scraping/scraping-service');
         
         const result = await scrapingService.runFullScraping();
@@ -154,7 +154,7 @@ export class CronService {
     console.log('🔧 Executando pipeline manual...');
     
     try {
-      // Import and call the pipeline service directly instead of HTTP fetch
+      // Import the singleton instance of processing service
       const { processingService } = await import('@/lib/llm/processing-service');
       
       const result = await processingService.runFullPipeline();
@@ -169,7 +169,7 @@ export class CronService {
     console.log('🔧 Executando scraping manual...');
     
     try {
-      // Import and call the scraping service directly instead of HTTP fetch
+      // Import the singleton instance of scraping service
       const { scrapingService } = await import('@/lib/scraping/scraping-service');
       
       const result = await scrapingService.runFullScraping();

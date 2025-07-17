@@ -366,4 +366,80 @@ export class ProcessingService {
       return false;
     }
   }
+
+  async runFullPipeline(): Promise<{
+    success: boolean;
+    scrapingJob?: any;
+    processingJob?: ProcessingJob;
+    publishedCount?: number;
+    error?: string;
+  }> {
+    try {
+      console.log('🚀 Iniciando pipeline completo: Scraping + LLM...');
+      
+      // Import ScrapingService dynamically to avoid circular dependencies
+      const { ScrapingService } = await import('@/lib/scraping/scraping-service');
+      const scrapingService = new ScrapingService();
+      
+      // Step 1: Run scraping job
+      console.log('📰 Passo 1: Executando scraping...');
+      const scrapingJob = await scrapingService.runScrapingJob();
+      
+      if (scrapingJob.status !== 'completed' || scrapingJob.articlesScraped === 0) {
+        return {
+          success: false,
+          error: `Scraping falhou: ${scrapingJob.error || 'Nenhum artigo encontrado'}`,
+          scrapingJob
+        };
+      }
+      
+      console.log(`✅ Scraping concluído: ${scrapingJob.articlesScraped} artigos`);
+      
+      // Step 2: Process articles with LLM
+      console.log('🤖 Passo 2: Processando artigos com LLM...');
+      const processingJob = await this.processAllPendingArticles();
+      
+      if (processingJob.status !== 'completed') {
+        return {
+          success: false,
+          error: `Processamento LLM falhou: ${processingJob.error || 'Erro desconhecido'}`,
+          scrapingJob,
+          processingJob
+        };
+      }
+      
+      console.log(`✅ Processamento concluído: ${processingJob.articlesProcessed} artigos`);
+      
+      // Step 3: Auto-publish articles
+      console.log('📢 Passo 3: Publicando artigos...');
+      const processedArticles = await this.getProcessedArticles(10);
+      
+      let publishedCount = 0;
+      for (const article of processedArticles) {
+        if (!article.is_published) {
+          const published = await this.publishArticle(article.id);
+          if (published) publishedCount++;
+        }
+      }
+      
+      console.log(`✅ Pipeline completo: ${publishedCount} artigos publicados`);
+      
+      return {
+        success: true,
+        scrapingJob,
+        processingJob,
+        publishedCount
+      };
+      
+    } catch (error) {
+      console.error('❌ Erro no pipeline:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido no pipeline'
+      };
+    }
+  }
 }
+
+// Export singleton instance
+export const processingService = new ProcessingService();
