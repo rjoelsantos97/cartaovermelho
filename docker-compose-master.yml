@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  cartao-vermelho:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+        OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://cartaovermelho.pt}
+        ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@cartaovermelho.pt}
+        ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+        DEBUG: "false"
+    container_name: cartao-vermelho-app
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      # Supabase Cloud Configuration
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+      
+      # OpenRouter API
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      
+      # Site URL
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://cartaovermelho.pt}
+      
+      # Admin user configuration
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@cartaovermelho.pt}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      
+      # Debug mode
+      DEBUG: "false"
+      
+      # Node environment
+      NODE_ENV: "production"
+    restart: unless-stopped
+    networks:
+      - cartao-vermelho-network
+
+networks:
+  cartao-vermelho-network:
+    driver: bridge
