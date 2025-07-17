@@ -29,7 +29,7 @@ export class OpenRouterClient {
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: process.env.OPENROUTER_API_KEY,
       defaultHeaders: {
-        "HTTP-Referer": "http://localhost:3000", // Site URL for rankings
+        "HTTP-Referer": process.env.NODE_ENV === 'production' ? "https://cartaovermelho.pt" : "http://localhost:3000", // Site URL for rankings
         "X-Title": "Cartão Vermelho News", // App name for rankings
       },
     });
