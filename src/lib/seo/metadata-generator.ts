@@ -27,7 +27,7 @@ export function generateArticleMetadata(
   article: ArticleMetadata,
   slug: string
 ): Metadata {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain for metadata
   const articleUrl = `${siteUrl}/article/${slug}`;
   
   // Generate optimized title
@@ -135,7 +135,7 @@ export function generateArticleMetadata(
 }
 
 export function generateHomePageMetadata(): Metadata {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain
   
   return {
     title: 'Cartão Vermelho News - As Notícias Desportivas Mais Dramáticas de Portugal',

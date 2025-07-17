@@ -147,7 +147,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const categoryName = slugToCategory(params.category);
   const stats = await getCategoryStats(categoryName);
   
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain
   const categoryUrl = `${siteUrl}/category/${params.category}`;
   
   return {

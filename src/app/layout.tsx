@@ -51,7 +51,7 @@ export default function RootLayout({
         <meta name="bingbot" content="index, follow" />
         
         {/* Site structure hints */}
-        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt'}`} />
+        <link rel="canonical" href="https://cartaovermelho.pt" />
         <link rel="alternate" type="application/rss+xml" title="Cartão Vermelho News RSS" href="/rss.xml" />
         
         {/* Structured Data */}

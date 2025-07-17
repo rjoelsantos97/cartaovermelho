@@ -6,7 +6,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://cartaovermelho.pt';
+  const siteUrl = 'https://cartaovermelho.pt'; // Always use production domain
   
   return {
     rules: [
