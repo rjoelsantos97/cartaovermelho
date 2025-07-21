@@ -76,7 +76,7 @@ export default function RootLayout({
         
         {/* Site structure hints */}
         <link rel="canonical" href="https://cartaovermelho.pt" />
-        <link rel="alternate" type="application/rss+xml" title="Cartão Vermelho News RSS" href="/rss.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Cartão Vermelho News RSS" href="/feed.xml" />
         
         {/* Structured Data */}
         <script
