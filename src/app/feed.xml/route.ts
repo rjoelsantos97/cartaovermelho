@@ -15,7 +15,7 @@ export async function GET() {
   // Get latest 50 published articles for RSS
   const { data: articles, error } = await supabase
     .from('processed_articles')
-    .select('id, title, slug, summary, processed_at, category, content')
+    .select('id, title, slug, processed_at, category, content')
     .eq('is_published', true)
     .order('processed_at', { ascending: false })
     .limit(50);
@@ -55,12 +55,14 @@ export async function GET() {
         ?.replace(/&/g, '&amp;')  // Escape ampersands
         ?.replace(/</g, '&lt;')   // Escape less than
         ?.replace(/>/g, '&gt;')   // Escape greater than
-        ?.substring(0, 500) + '...' || article.summary || '';
+        ?.substring(0, 500) + '...' || '';
+
+      const description = cleanContent || article.title;
 
       return `
     <item>
       <title><![CDATA[${article.title}]]></title>
-      <description><![CDATA[${article.summary || cleanContent}]]></description>
+      <description><![CDATA[${description}]]></description>
       <content:encoded><![CDATA[${cleanContent}]]></content:encoded>
       <link>${articleUrl}</link>
       <guid isPermaLink="true">${articleUrl}</guid>
