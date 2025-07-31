@@ -22,10 +22,12 @@ export const metadata: Metadata = {
   ...generateHomePageMetadata(),
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
     ],
+    shortcut: '/favicon.ico',
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
@@ -59,7 +61,9 @@ export default function RootLayout({
           }}
         />
         
-        {/* Additional favicon compatibility */}
+        {/* Favicon compatibility for all browsers and devices */}
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />

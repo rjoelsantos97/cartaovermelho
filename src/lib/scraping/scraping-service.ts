@@ -113,14 +113,35 @@ export class ScrapingService {
         return false;
       }
 
-      // Scrape full content if needed
+      // Scrape full content and additional data if needed
       let fullContent = article.content;
-      if (!fullContent && article.sourceUrl) {
+      let finalImageUrl = article.imageUrl; // Start with RSS image
+      let finalAuthor = article.author;
+      
+      if (article.sourceUrl) {
         try {
           const fullArticle = await this.scraper.scrapeFullArticle(article.sourceUrl);
-          fullContent = fullArticle.content || '';
+          
+          // Use full article content if available
+          if (fullArticle.content) {
+            fullContent = fullArticle.content;
+          }
+          
+          // Prefer image from full article over RSS image
+          if (fullArticle.imageUrl) {
+            finalImageUrl = fullArticle.imageUrl;
+          }
+          
+          // Use author from full article if not available from RSS
+          if (fullArticle.author && !finalAuthor) {
+            finalAuthor = fullArticle.author;
+          }
         } catch (error) {
           console.warn(`Failed to scrape full content for ${article.sourceUrl}:`, error);
+          // Use excerpt as fallback if full content scraping fails
+          if (!fullContent) {
+            fullContent = article.excerpt || '';
+          }
         }
       }
 
@@ -133,8 +154,8 @@ export class ScrapingService {
           category: this.normalizeCategory(article.category),
           published_at: article.publishedAt,
           url: article.sourceUrl,
-          image_url: article.imageUrl,
-          author: article.author,
+          image_url: finalImageUrl,
+          author: finalAuthor,
           source: 'abola.pt'
         });
 

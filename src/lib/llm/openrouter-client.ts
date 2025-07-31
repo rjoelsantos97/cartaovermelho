@@ -63,7 +63,7 @@ export class OpenRouterClient {
             }
           ],
           temperature: 0.8,
-          max_tokens: 10000,
+          max_tokens: 16000, // Increased from 10000 to 16000 for longer content
           response_format: { type: "json_object" }
         });
 
@@ -73,7 +73,10 @@ export class OpenRouterClient {
         }
 
         console.log(`LLM Response for "${article.title}":`, response.substring(0, 200) + '...');
-        return this.parseResponse(response, article);
+        console.log(`Response length: ${response.length} characters`);
+        const result = this.parseResponse(response, article);
+        console.log(`Processed content length: ${result.dramaticContent.length} characters`);
+        return result;
       } catch (error: any) {
         console.error(`Error processing article with LLM (attempt ${attempt}):`, error);
         
@@ -150,10 +153,12 @@ Transformar notícias desportivas sérias em espetáculos sensacionalistas e inv
 
 ## FORMATO OBRIGATÓRIO:
 - **Texto jornalístico puro** em parágrafos corridos
+- **CONTEÚDO COMPLETO OBRIGATÓRIO** - nunca cortes o artigo a meio
 - **Factos corretos** sempre, só dramatiza a apresentação
 - **Nunca explicar piadas** - humor deve emergir naturalmente
 - **Sem subtítulos ou secções** - apenas texto corrido como jornal normal
 - **Criatividade contextual** - adapta linguagem ao desporto específico
+- **TERMINA SEMPRE O ARTIGO** com uma conclusão adequada
 - Devolve texto limpo sem formatação especial
 
 ## INSTRUÇÕES DE CRIATIVIDADE:
@@ -178,7 +183,9 @@ IMPORTANTE: Responda APENAS com JSON válido, sem texto adicional antes ou depoi
   "processingNotes": "notas opcionais"
 }
 
-CRITICAL: O título deve ter NO MÁXIMO 6-8 palavras. Conte as palavras! Se tem mais de 8 palavras, CORTE!`;
+CRITICAL: O título deve ter NO MÁXIMO 6-8 palavras. Conte as palavras! Se tem mais de 8 palavras, CORTE!
+
+**REGRA MAIS IMPORTANTE**: O "dramaticContent" deve ser um artigo COMPLETO com início, meio e FIM. NUNCA cortes a meio de uma frase ou parágrafo. Sempre termina com uma conclusão adequada!`;
   }
 
   private buildPrompt(article: ArticleToProcess): string {
@@ -206,12 +213,14 @@ INSTRUÇÕES ESPECÍFICAS:
 - Urgência "high" apenas para situações graves
 - Urgência "breaking" apenas para eventos excecionais
 - CRÍTICO: O título deve ter EXATAMENTE 6-8 palavras. Conte as palavras antes de responder!
+- CRÍTICO: NUNCA CORTES O ARTIGO A MEIO - o conteúdo deve ter início, meio e fim completos
+- OBRIGATÓRIO: O artigo deve ter pelo menos 4-6 parágrafos substanciais
 - IMPORTANTE: Escreve texto jornalístico em parágrafos bem separados
 - Separa cada parágrafo com quebras duplas (\\n\\n) para boa legibilidade
 - Cada parágrafo deve ter 2-4 frases máximo
 - Primeiro parágrafo: lead da notícia (quem, o quê, onde, quando)
-- Parágrafos seguintes: desenvolvimento detalhado da história
-- Último parágrafo: conclusão, perspetivas ou consequências
+- Parágrafos seguintes: desenvolvimento detalhado da história com TODOS os detalhes
+- Último parágrafo: conclusão, perspetivas ou consequências - SEMPRE termina o artigo
 - USA **palavra** para enfatizar termos importantes (ex: **DRAMA**, **não perdoou**)
 - NÃO uses subtítulos, secções, rodapés ou estruturas especiais
 - NÃO escrevas coisas como "RODAPÉ DRAMÁTICO:", "EM DESTAQUE:", etc.
@@ -272,6 +281,17 @@ Responda em JSON válido conforme o formato especificado.`;
       // Validate required fields
       if (!parsed.dramaticTitle || !parsed.dramaticContent) {
         throw new Error('Missing required fields in LLM response');
+      }
+
+      // Check if content appears to be cut off (ends abruptly)
+      const content = parsed.dramaticContent.trim();
+      const lastSentenceIncomplete = !content.match(/[.!?][\s]*$/) && content.length > 50;
+      if (lastSentenceIncomplete) {
+        console.warn('Content appears to be cut off - last sentence incomplete');
+        // Add a proper ending if content was cut
+        if (!content.endsWith('.') && !content.endsWith('!') && !content.endsWith('?')) {
+          parsed.dramaticContent = content + '.';
+        }
       }
 
       // Ensure drama score is valid
